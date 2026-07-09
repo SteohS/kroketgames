@@ -12,8 +12,11 @@ const I18N = (() => {
       games: {
         'shapes': 'Les formes',
         'animal-sounds': 'Les animaux',
+        'counting': 'Compter',
       },
       whereIs: ({ name }) => `Où est ${name} ?`,
+      countPrompt: ({ n, name }) => `Touche ${n} ${name} !`,
+      numbers: { 1: 'un', 2: 'deux', 3: 'trois', 4: 'quatre', 5: 'cinq' },
       praise: ['Bravo !', 'Super !', 'Oui, c\u2019est ça !', 'Très bien !'],
       // Spoken onomatopoeia fallback when no audio file exists for an animal
       animalSoundWords: {
@@ -29,8 +32,11 @@ const I18N = (() => {
       games: {
         'shapes': 'De vormen',
         'animal-sounds': 'De dieren',
+        'counting': 'Tellen',
       },
       whereIs: ({ name }) => `Waar is ${name}?`,
+      countPrompt: ({ n, name }) => `Tik op ${n} ${name}!`,
+      numbers: { 1: 'één', 2: 'twee', 3: 'drie', 4: 'vier', 5: 'vijf' },
       praise: ['Goed zo!', 'Super!', 'Ja, juist!', 'Heel goed!'],
       animalSoundWords: {
         cow: 'Boe, boe!', duck: 'Kwak kwak!', dog: 'Woef woef!',
@@ -45,8 +51,11 @@ const I18N = (() => {
       games: {
         'shapes': 'Shapes',
         'animal-sounds': 'Animals',
+        'counting': 'Counting',
       },
       whereIs: ({ name }) => `Where is ${name}?`,
+      countPrompt: ({ n, name }) => `Tap ${n} ${name}!`,
+      numbers: { 1: 'one', 2: 'two', 3: 'three', 4: 'four', 5: 'five' },
       praise: ['Well done!', 'Great job!', 'Yes, that\u2019s it!', 'Wonderful!'],
       animalSoundWords: {
         cow: 'Moo, moo!', duck: 'Quack quack!', dog: 'Woof woof!',

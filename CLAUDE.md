@@ -65,7 +65,9 @@ big emoji; `SoundKit.playAnimal()` falls back to TTS onomatopoeia. Dropping real
    Fully asset-free — this is the flagship game while art is being produced.
 2. ✅ **Animal sounds** (`animal-sounds`) — hear a sound, tap the right animal
    (works asset-free via emoji + TTS fallbacks; upgrade by dropping files in assets/).
-3. **Counting taps** — "tap three apples!", voice counts along each tap, celebrate at target.
+3. ✅ **Counting taps** (`counting`) — "tap three apples!", voice counts along each
+   tap, celebrate when all are counted (asset-free via emoji; upgrade by dropping
+   files in assets/images/objects/).
 4. **Free-play animal board** — grid of animals, tapping any plays its sound (no quiz).
 5. **Color hunt** — "find something red!" among everyday objects.
 6. **Peekaboo** — animal partially hidden, tap to reveal.

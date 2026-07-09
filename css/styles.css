@@ -246,6 +246,78 @@ img { pointer-events: none; -webkit-user-drag: none; }
 }
 .replay-button:active { transform: scale(0.92); }
 
+/* ---------- counting game ---------- */
+.count-stage {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(12px, 3vw, 28px);
+  justify-content: center;
+  align-items: center;
+  max-width: 780px;
+}
+
+.count-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(96px, 20vw, 150px);
+  aspect-ratio: 1 / 1;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  padding: 10px;
+  transition: transform 0.15s ease, opacity 0.3s ease;
+}
+.count-item:active { transform: scale(0.94); }
+
+.count-item .art {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  background: var(--tint, var(--paper));
+  font-size: clamp(2.8rem, 9vw, 4.4rem); /* emoji fallback size */
+  overflow: hidden;
+}
+.count-item .art img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 8%;
+}
+
+/* counted items dim and get a soft check badge */
+.count-item.counted { opacity: 0.55; }
+.count-item.counted::after {
+  content: '✓';
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--sage);
+  color: var(--card);
+  font-weight: 800;
+  font-size: 1.1rem;
+  box-shadow: var(--shadow);
+}
+
+.count-pop { animation: count-pop 0.35s ease; }
+@keyframes count-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
 /* ---------- feedback animations ---------- */
 .wiggle { animation: wiggle 0.45s ease; }
 @keyframes wiggle {
@@ -290,5 +362,5 @@ img { pointer-events: none; -webkit-user-drag: none; }
 
 /* ---------- reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
-  .bounce, .wiggle, .confetti-piece { animation: none !important; }
+  .bounce, .wiggle, .count-pop, .confetti-piece { animation: none !important; }
 }
