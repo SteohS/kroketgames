@@ -9,6 +9,9 @@ const I18N = (() => {
       menuTitle: 'Petits jeux',
       voiceLabel: 'Voix',
       limitLabel: 'Questions',
+      creditsLabel: 'Crédits',
+      creditsTitle: 'Crédits & sources',
+      creditsClose: 'Fermer',
       surpriseTitle: 'Surprise !',
       allDone: 'C’est fini ! Bravo !',
       games: {
@@ -32,6 +35,9 @@ const I18N = (() => {
       menuTitle: 'Spelletjes',
       voiceLabel: 'Stem',
       limitLabel: 'Vragen',
+      creditsLabel: 'Bronnen',
+      creditsTitle: 'Bronnen & credits',
+      creditsClose: 'Sluiten',
       surpriseTitle: 'Verrassing!',
       allDone: 'Klaar! Goed gedaan!',
       games: {
@@ -54,6 +60,9 @@ const I18N = (() => {
       menuTitle: 'Mini Games',
       voiceLabel: 'Voice',
       limitLabel: 'Questions',
+      creditsLabel: 'Credits',
+      creditsTitle: 'Credits & sources',
+      creditsClose: 'Close',
       surpriseTitle: 'Surprise!',
       allDone: 'All done! Well done!',
       games: {

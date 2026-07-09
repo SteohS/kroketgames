@@ -22,6 +22,17 @@ const App = (() => {
   const ACCENTS = ['var(--sage)', 'var(--sky)', 'var(--coral)', 'var(--lilac)', 'var(--butter)'];
   const ROLLING_ROUNDS = 3; // rounds per game before rotating in surprise mode
 
+  // Third-party asset attribution, shown in the parent-facing Credits modal.
+  // Add a new entry here whenever assets from a new source are dropped in —
+  // no other code changes needed. Keep it in sync with README's Credits section.
+  const ASSET_CREDITS = [
+    {
+      kind: 'Animal sounds',
+      detail: 'Free sound effects by Mixkit — no attribution required, credited here anyway.',
+      url: 'https://mixkit.co/free-sound-effects/animals/',
+    },
+  ];
+
   let currentGame = null;
   let rolling = null; // { order: [...games], idx } while surprise mode is active
 
@@ -42,6 +53,7 @@ const App = (() => {
     $('#menu-title').textContent = I18N.t('menuTitle');
     $('#lang-label').textContent = I18N.t('voiceLabel');
     $('#limit-label').textContent = I18N.t('limitLabel');
+    $('#credits-btn').textContent = I18N.t('creditsLabel');
 
     const list = $('#game-list');
     list.innerHTML = '';
@@ -206,6 +218,49 @@ const App = (() => {
     });
   }
 
+  /* ---------- credits modal (parent-facing) ---------- */
+
+  function setupCredits() {
+    const btn = $('#credits-btn');
+    const modal = $('#credits-modal');
+    const close = $('#credits-close');
+
+    function render() {
+      $('#credits-heading').textContent = I18N.t('creditsTitle');
+      close.textContent = I18N.t('creditsClose');
+      const body = $('#credits-body');
+      body.innerHTML = '';
+      ASSET_CREDITS.forEach(c => {
+        const item = document.createElement('div');
+        item.className = 'credit-item';
+        const kind = document.createElement('div');
+        kind.className = 'credit-kind';
+        kind.textContent = c.kind;
+        const detail = document.createElement('div');
+        detail.className = 'credit-detail';
+        detail.textContent = c.detail;
+        item.append(kind, detail);
+        if (c.url) {
+          const link = document.createElement('a');
+          link.href = c.url;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.textContent = c.url;
+          item.appendChild(link);
+        }
+        body.appendChild(item);
+      });
+    }
+
+    const open = () => { render(); modal.classList.remove('hidden'); };
+    const hide = () => modal.classList.add('hidden');
+
+    btn.addEventListener('click', open);
+    close.addEventListener('click', hide);
+    // Tapping the dim backdrop (but not the card) closes it
+    modal.addEventListener('click', e => { if (e.target === modal) hide(); });
+  }
+
   /* ---------- shared confetti ---------- */
 
   const CONFETTI_COLORS = ['#A8C5A0', '#A9C7DE', '#F5D98B', '#EFA48B', '#C5B3D6'];
@@ -231,6 +286,7 @@ const App = (() => {
     renderMenu();
     setupSettings();
     setupExitZone();
+    setupCredits();
   });
 
   return { confetti, exitToMenu };

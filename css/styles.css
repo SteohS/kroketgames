@@ -253,6 +253,85 @@ img { pointer-events: none; -webkit-user-drag: none; }
   padding: 6px 10px;
 }
 
+/* Deliberately quiet parent link — not a shiny game button */
+.credits-btn {
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  background: none;
+  border: none;
+  padding: 6px 8px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ---------- credits modal (parent-facing) ---------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(74, 68, 64, 0.35);
+  animation: fade-in 0.25s ease;
+}
+.modal-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 28px 26px 24px;
+  width: 100%;
+  max-width: 460px;
+  max-height: 82vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  text-align: center;
+}
+.modal-title {
+  margin: 0 0 16px;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+.credits-body {
+  text-align: left;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.credit-item { margin: 0 0 16px; }
+.credit-item:last-child { margin-bottom: 0; }
+.credit-item .credit-kind {
+  font-weight: 800;
+  color: var(--ink);
+}
+.credit-item .credit-detail {
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+.credit-item a {
+  color: var(--sky);
+  font-weight: 700;
+  word-break: break-word;
+}
+.credits-close {
+  margin-top: 22px;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--ink);
+  background: var(--butter);
+  border: none;
+  border-radius: 16px;
+  padding: 12px 28px;
+  cursor: pointer;
+  box-shadow: var(--shadow-press);
+}
+
 /* ---------- game screen & exit zone ---------- */
 #game-container {
   width: 100%;

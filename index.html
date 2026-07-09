@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800&display=swap" rel="stylesheet" />
   <!-- ?v bumped whenever styles.css changes, to bust Safari's aggressive cache -->
-  <link rel="stylesheet" href="css/styles.css?v=3" />
+  <link rel="stylesheet" href="css/styles.css?v=4" />
 </head>
 <body>
 
@@ -58,8 +58,20 @@
           <option value="20">20</option>
         </select>
       </div>
+      <button id="credits-btn" class="credits-btn" type="button">Credits</button>
     </footer>
   </main>
+
+  <!-- ============ CREDITS MODAL (parent-facing) ============ -->
+  <!-- Attribution for third-party assets. Hidden by default; opened from the
+       menu footer. Content is rendered by app.js from the ASSET_CREDITS list. -->
+  <div id="credits-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="credits-heading">
+    <div class="modal-card">
+      <h2 id="credits-heading" class="modal-title">Credits &amp; sources</h2>
+      <div id="credits-body" class="credits-body"></div>
+      <button id="credits-close" class="credits-close" type="button">Close</button>
+    </div>
+  </div>
 
   <!-- ============ GAME SCREEN ============ -->
   <section id="game-screen" class="screen hidden">

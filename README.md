@@ -54,3 +54,17 @@ when handing over the iPad.
   many correct answers and shows a "well done!" screen. The choice is remembered.
 - To exit a game (or the well-done screen): **press and hold the top-left corner
   for 3 seconds** (a small ring fills up as you hold). This is the only way out.
+- **Credits** link (also in the menu footer) opens a popup listing the third-party
+  assets used. See below.
+
+## Credits & third-party assets
+
+Attribution for assets sourced from elsewhere. This list is mirrored in-app by the
+**Credits** popup on the menu screen — keep the two in sync (the app reads from the
+`ASSET_CREDITS` array in `js/app.js`).
+
+- **Animal sounds** — free sound effects by [Mixkit](https://mixkit.co/free-sound-effects/animals/).
+  Mixkit's free license requires no attribution; credited here anyway.
+
+When you add assets from a new source, add an entry both here and in the
+`ASSET_CREDITS` array in `js/app.js` (no other code changes needed).
