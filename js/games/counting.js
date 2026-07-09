@@ -9,6 +9,7 @@
 
 (() => {
   const MIN = 2, MAX = 5;   // count range: 2 keeps French gender-neutral (deux/trois…)
+  const kit = GameKit.session();
   let container = null;
   let opts = {};
   let object = null;        // the countable used this round
@@ -16,7 +17,6 @@
   let counted = 0;          // how many tapped so far
   let correctCount = 0;     // completed rounds (for rolling mode)
   let busy = false;         // ignore taps during celebration/transition
-  let alive = false;        // false once the game is stopped
 
   function promptText() {
     const n = I18N.t('numbers.' + target);
@@ -24,37 +24,19 @@
   }
 
   async function playPrompt() {
-    if (!alive) return;
+    if (!kit.alive) return;
     await SoundKit.speak(promptText());
   }
 
-  function popItem(item) {
-    item.classList.remove('count-pop');
-    void item.offsetWidth; // restart animation
-    item.classList.add('count-pop');
-  }
-
   function newRound() {
-    if (!alive) return;
+    if (!kit.alive) return;
     busy = false;
     counted = 0;
     target = MIN + Math.floor(Math.random() * (MAX - MIN + 1));
     object = CountRegistry.pick();
 
     container.innerHTML = '';
-
-    // prompt bar: one big replay button
-    const bar = document.createElement('div');
-    bar.className = 'prompt-bar';
-    const replay = document.createElement('button');
-    replay.className = 'replay-button';
-    replay.textContent = '🔊';
-    replay.addEventListener('click', () => { if (!busy) playPrompt(); });
-    bar.appendChild(replay);
-    const label = document.createElement('span');
-    label.className = 'prompt-text';
-    label.textContent = promptText();
-    bar.appendChild(label);
+    const bar = GameKit.promptBar(promptText(), () => { if (!busy) playPrompt(); });
 
     // N identical objects to tap
     const stage = document.createElement('div');
@@ -72,12 +54,12 @@
   }
 
   async function onTap(item, stage) {
-    if (busy || !alive) return;
+    if (busy || !kit.alive) return;
     if (item.classList.contains('counted')) return; // already counted — ignore
 
     item.classList.add('counted');
     counted++;
-    popItem(item);
+    GameKit.restartAnim(item, 'count-pop');
     SoundKit.pop();
 
     const numberWord = I18N.t('numbers.' + counted);
@@ -92,22 +74,15 @@
     busy = true;
     correctCount++;
     await SoundKit.speak(numberWord, { rate: 1 });
-    if (!alive) return;
+    if (!kit.alive) return;
     App.confetti();
     await SoundKit.success();
-    if (!alive) return;
+    if (!kit.alive) return;
     await SoundKit.speak(I18N.praise());
-    if (!alive) return;
+    if (!kit.alive) return;
 
     stage.classList.add('fade-out');
-    setTimeout(() => {
-      if (!alive) return;
-      if (opts.rounds && correctCount >= opts.rounds && opts.onCycleComplete) {
-        opts.onCycleComplete();
-      } else {
-        newRound();
-      }
-    }, 600);
+    kit.advance(600, { count: correctCount, opts, next: newRound });
   }
 
   Games.register({
@@ -118,12 +93,12 @@
       container = el;
       opts = o;
       correctCount = 0;
-      alive = true;
+      kit.start();
       newRound();
     },
     stop() {
-      alive = false;
       busy = false;
+      kit.stop();
     },
   });
 })();

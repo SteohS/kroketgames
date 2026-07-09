@@ -15,7 +15,6 @@ const I18N = (() => {
       creditsLabel: 'Crédits',
       creditsTitle: 'Crédits & sources',
       creditsClose: 'Fermer',
-      surpriseTitle: 'Surprise !',
       allDone: 'C’est fini ! Bravo !',
       games: {
         'shapes': 'Les formes',
@@ -49,7 +48,6 @@ const I18N = (() => {
       creditsLabel: 'Bronnen',
       creditsTitle: 'Bronnen & credits',
       creditsClose: 'Sluiten',
-      surpriseTitle: 'Verrassing!',
       allDone: 'Klaar! Goed gedaan!',
       games: {
         'shapes': 'De vormen',
@@ -82,7 +80,6 @@ const I18N = (() => {
       creditsLabel: 'Credits',
       creditsTitle: 'Credits & sources',
       creditsClose: 'Close',
-      surpriseTitle: 'Surprise!',
       allDone: 'All done! Well done!',
       games: {
         'shapes': 'Shapes',
@@ -108,6 +105,8 @@ const I18N = (() => {
   };
 
   let lang = localStorage.getItem('lang') || 'fr';
+  // Keep the document language in sync so assistive tech matches the spoken one.
+  document.documentElement.lang = lang;
 
   return {
     get lang() { return lang; },
@@ -115,6 +114,7 @@ const I18N = (() => {
       if (STRINGS[l]) {
         lang = l;
         localStorage.setItem('lang', l);
+        document.documentElement.lang = l;
       }
     },
     /** t('whereIs', {name: 'la vache'}) or t('games.animal-sounds') */

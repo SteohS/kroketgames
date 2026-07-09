@@ -1,6 +1,10 @@
 {
   "name": "Mini Games",
   "short_name": "Mini Games",
+  "description": "Calm little spoken mini-games for toddlers (FR/NL/EN).",
+  "lang": "fr",
+  "id": "/",
+  "scope": ".",
   "start_url": ".",
   "display": "fullscreen",
   "orientation": "landscape",
@@ -8,9 +12,16 @@
   "theme_color": "#FBF7EF",
   "icons": [
     {
+      "src": "assets/images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
       "src": "assets/images/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }

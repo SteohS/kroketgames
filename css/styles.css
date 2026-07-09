@@ -827,6 +827,8 @@ img { pointer-events: none; -webkit-user-drag: none; }
 /* ---------- reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
   .bounce, .wiggle, .count-pop, .confetti-piece { animation: none !important; }
+  /* swap content instantly instead of cross-fading it */
+  .fade-in, .fade-out, .modal-overlay { animation: none !important; }
   /* still reveal the animal without sliding the blanket */
   .peek-lift { animation: none !important; opacity: 0 !important; }
   /* keep the scene, but hold it still (sun mid-glow, clouds parked in view) */

@@ -23,20 +23,10 @@ const AnimalRegistry = (() => {
 
   /** Build the .art element: <img> if the file exists, emoji otherwise. */
   function artFor(animal) {
-    const div = document.createElement('div');
-    div.className = 'art';
-    div.style.setProperty('--tint', animal.tint);
-    div.textContent = animal.emoji; // fallback shown immediately
-
-    if (!missing.has(animal.id)) {
-      const img = document.createElement('img');
-      img.alt = '';
-      img.src = `assets/images/animals/${animal.id}.png`;
-      img.onload = () => { div.textContent = ''; div.appendChild(img); known.add(animal.id); };
-      img.onerror = () => { missing.add(animal.id); };
-      if (known.has(animal.id)) { div.textContent = ''; div.appendChild(img); }
-    }
-    return div;
+    return RegistryKit.imageArt({
+      id: animal.id, emoji: animal.emoji, tint: animal.tint,
+      alt: nameOf(animal), dir: 'assets/images/animals', known, missing,
+    });
   }
 
   function nameOf(animal) { return animal.name[I18N.lang]; }

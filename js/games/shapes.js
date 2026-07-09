@@ -7,24 +7,24 @@
 
 (() => {
   const CARD_COUNT = 3;
+  const kit = GameKit.session();
   let container = null;
   let opts = {};
   let target = null;          // { shape, color }
   let correctCount = 0;
   let busy = false;
-  let alive = false;
 
   function promptText() {
     return I18N.t('whereIs', { name: ShapeRegistry.nameOf(target.shape) });
   }
 
   async function playPrompt() {
-    if (!alive) return;
+    if (!kit.alive) return;
     await SoundKit.speak(promptText());
   }
 
   function newRound() {
-    if (!alive) return;
+    if (!kit.alive) return;
     busy = false;
 
     const picked = ShapeRegistry.pick(CARD_COUNT);
@@ -32,18 +32,7 @@
     const shuffled = [...picked].sort(() => Math.random() - 0.5);
 
     container.innerHTML = '';
-
-    const bar = document.createElement('div');
-    bar.className = 'prompt-bar';
-    const replay = document.createElement('button');
-    replay.className = 'replay-button';
-    replay.textContent = '🔊';
-    replay.addEventListener('click', () => { if (!busy) playPrompt(); });
-    bar.appendChild(replay);
-    const label = document.createElement('span');
-    label.className = 'prompt-text';
-    label.textContent = promptText();
-    bar.appendChild(label);
+    const bar = GameKit.promptBar(promptText(), () => { if (!busy) playPrompt(); });
 
     const row = document.createElement('div');
     row.className = 'card-row fade-in';
@@ -60,13 +49,11 @@
   }
 
   async function onTap(card, item, row) {
-    if (busy || !alive) return;
+    if (busy || !kit.alive) return;
 
     if (item.shape.id !== target.shape.id) {
       SoundKit.nope();
-      card.classList.remove('wiggle');
-      void card.offsetWidth;
-      card.classList.add('wiggle');
+      GameKit.wiggle(card);
       return;
     }
 
@@ -75,19 +62,14 @@
     card.classList.add('bounce');
     App.confetti();
     await SoundKit.success();
-    if (!alive) return;
+    if (!kit.alive) return;
+    await SoundKit.speak(ShapeRegistry.nameOf(target.shape)); // reinforce the shape name
+    if (!kit.alive) return;
     await SoundKit.speak(I18N.praise());
-    if (!alive) return;
+    if (!kit.alive) return;
 
     row.classList.add('fade-out');
-    setTimeout(() => {
-      if (!alive) return;
-      if (opts.rounds && correctCount >= opts.rounds && opts.onCycleComplete) {
-        opts.onCycleComplete();
-      } else {
-        newRound();
-      }
-    }, 500);
+    kit.advance(500, { count: correctCount, opts, next: newRound });
   }
 
   Games.register({
@@ -98,12 +80,12 @@
       container = el;
       opts = o;
       correctCount = 0;
-      alive = true;
+      kit.start();
       newRound();
     },
     stop() {
-      alive = false;
       busy = false;
+      kit.stop();
     },
   });
 })();
