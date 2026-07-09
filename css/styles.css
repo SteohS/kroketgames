@@ -13,6 +13,14 @@
   --coral:  #EFA48B;
   --lilac:  #C5B3D6;
 
+  /* outdoor scene (background) — pastel, in-palette with sky/sage/butter */
+  --sky-top:    #9EC1DB;   /* a touch deeper than --sky, up high */
+  --sky-mid:    #B9D6E8;
+  --sky-low:    #D6E8F2;   /* pale near the horizon */
+  --grass-back: #BAD3B2;   /* lighter rolling hill behind */
+  --grass-front:#A8C5A0;   /* = --sage, hill in front */
+  --cloud:      #FFFFFF;
+
   --radius: 28px;
   --shadow: 0 6px 18px rgba(74, 68, 64, 0.10);
   --shadow-press: 0 2px 6px rgba(74, 68, 64, 0.12);
@@ -34,12 +42,103 @@ html, body {
   overflow: hidden;              /* no scroll, no pull-to-refresh */
   overscroll-behavior: none;
   touch-action: manipulation;    /* kills double-tap zoom */
-  background: var(--paper);
   color: var(--ink);
   font-family: var(--font);
 }
+/* paper stays on <html> only as the ultimate fallback; <body> must be
+   transparent so the fixed .scene (z-index:-1) shows through behind the
+   transparent screens. A body background would paint over it. */
+html { background: var(--paper); }
+body { background: transparent; }
 
 img { pointer-events: none; -webkit-user-drag: none; }
+
+/* ---------- animated scene (background) ---------- */
+/* Sits behind the (transparent) screens via z-index:-1; never eats taps.
+   Slow, gentle motion only — calm picture-book feel, not a screensaver. */
+.scene {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: linear-gradient(var(--sky-top) 0%, var(--sky-mid) 52%, var(--sky-low) 100%);
+}
+
+/* sun — a soft disc up in the corner, slowly breathing its glow, with very
+   faint rays turning almost imperceptibly. */
+.sun {
+  position: absolute;
+  top: 9vh;
+  right: 13vw;
+  width: 108px;
+  height: 108px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 45%, #FCEBB6 0%, var(--butter) 62%, #EFC96B 100%);
+  box-shadow: 0 0 40px 12px rgba(245, 217, 139, 0.5);
+  animation: sun-glow 7s ease-in-out infinite;
+}
+.sun::before {
+  content: '';
+  position: absolute;
+  inset: -62px;
+  border-radius: 50%;
+  background: repeating-conic-gradient(rgba(245, 217, 139, 0.16) 0deg 7deg, transparent 7deg 22deg);
+  -webkit-mask: radial-gradient(circle, transparent 56px, #000 60px);
+          mask: radial-gradient(circle, transparent 56px, #000 60px);
+  animation: sun-rays 100s linear infinite;
+}
+@keyframes sun-glow {
+  0%, 100% { box-shadow: 0 0 38px 12px rgba(245, 217, 139, 0.42); }
+  50%      { box-shadow: 0 0 66px 24px rgba(245, 217, 139, 0.68); }
+}
+@keyframes sun-rays {
+  to { transform: rotate(360deg); }
+}
+
+/* clouds — fluffy pill + two puffs, semitransparent so the sky shows through.
+   Each drifts fully across and off the screen, then loops. Sizes vary via the
+   independent `scale` property so the translateX animation composes cleanly. */
+.cloud {
+  position: absolute;
+  width: 120px;
+  height: 44px;
+  border-radius: 44px;
+  background: var(--cloud);
+  animation: drift linear infinite;
+  will-change: transform;
+}
+.cloud::before,
+.cloud::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: var(--cloud);
+}
+.cloud::before { width: 56px; height: 56px; left: 16px;  top: -22px; }
+.cloud::after  { width: 76px; height: 76px; right: 14px; top: -34px; }
+
+.cloud-1 { top: 10%; scale: 1;    opacity: 0.80; animation-duration: 74s;  animation-delay: -6s;  }
+.cloud-2 { top: 25%; scale: 1.5;  opacity: 0.60; animation-duration: 108s; animation-delay: -58s; }
+.cloud-3 { top: 40%; scale: 0.85; opacity: 0.70; animation-duration: 62s;  animation-delay: -30s; }
+.cloud-4 { top: 17%; scale: 1.2;  opacity: 0.72; animation-duration: 90s;  animation-delay: -72s; }
+
+@keyframes drift {
+  from { transform: translateX(-170px); }
+  to   { transform: translateX(calc(100vw + 170px)); }
+}
+
+/* grass — two soft rolling hills for a little depth. */
+.hill {
+  position: absolute;
+  left: -10%;
+  width: 120%;
+  bottom: 0;
+  border-top-left-radius: 100% 64px;
+  border-top-right-radius: 100% 64px;
+}
+.hill-back  { height: 21vh; background: var(--grass-back);  }
+.hill-front { height: 14vh; background: var(--grass-front); }
 
 /* ---------- screens ---------- */
 .screen {
@@ -414,4 +513,10 @@ img { pointer-events: none; -webkit-user-drag: none; }
 /* ---------- reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
   .bounce, .wiggle, .count-pop, .confetti-piece { animation: none !important; }
+  /* keep the scene, but hold it still (sun mid-glow, clouds parked in view) */
+  .sun, .sun::before, .cloud { animation: none !important; }
+  .cloud-1 { transform: translateX(12vw);  }
+  .cloud-2 { transform: translateX(58vw);  }
+  .cloud-3 { transform: translateX(34vw);  }
+  .cloud-4 { transform: translateX(78vw);  }
 }
