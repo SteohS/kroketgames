@@ -56,6 +56,7 @@
   Games.register({
     id: 'free-play',
     icon: '🐾',
+    age: 2,
     start(el, o = {}) {
       container = el;
       opts = o;

@@ -52,43 +52,113 @@ const App = (() => {
 
   const $ = sel => document.querySelector(sel);
 
-  /* ---------- menu ---------- */
+  /* ---------- game selection (config screen) ---------- */
 
-  function renderMenu() {
+  // Which games are ticked to be included in a session. Persisted so the parent
+  // doesn't re-tick every time. Default (first visit / bad data): all ticked.
+  function loadSelection() {
+    const raw = localStorage.getItem('selectedGames');
+    if (raw) {
+      try {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) return new Set(arr);
+      } catch { /* fall through to default */ }
+    }
+    return new Set(Games.all.map(g => g.id));
+  }
+  // Populated in boot — games register after this script loads, so Games.all is
+  // still empty here; a first-visit default must be computed once they exist.
+  let selected = new Set();
+
+  function saveSelection() {
+    localStorage.setItem('selectedGames', JSON.stringify([...selected]));
+  }
+
+  /* ---------- config screen ---------- */
+
+  // Builds the age-grouped, tickable game cards plus the labels around them.
+  // Called on boot and whenever the language changes.
+  function renderConfig() {
     $('#menu-title').textContent = I18N.t('menuTitle');
+    $('#choose-games').textContent = I18N.t('chooseGames');
     $('#lang-label').textContent = I18N.t('voiceLabel');
     $('#limit-label').textContent = I18N.t('limitLabel');
     $('#credits-btn').textContent = I18N.t('creditsLabel');
+    $('#start-btn').textContent = I18N.t('startLabel');
 
     const list = $('#game-list');
     list.innerHTML = '';
 
-    // Surprise (rolling) button first — plays all games in rotation
-    if (Games.all.length > 1) {
-      const btn = makeMenuButton('🎲', I18N.t('surpriseTitle'), 'var(--butter)');
-      btn.addEventListener('click', startRolling);
-      list.appendChild(btn);
-    }
-
-    Games.all.forEach((game, i) => {
-      const btn = makeMenuButton(game.icon, I18N.t(`games.${game.id}`), ACCENTS[i % ACCENTS.length]);
-      btn.addEventListener('click', () => playGame(game));
-      list.appendChild(btn);
+    const bands = [...new Set(Games.all.map(g => g.age ?? 2))].sort((a, b) => a - b);
+    bands.forEach(age => {
+      const group = document.createElement('section');
+      group.className = 'age-group';
+      const heading = document.createElement('h2');
+      heading.className = 'age-heading';
+      heading.textContent = I18N.t(`ageBands.${age}`);
+      const grid = document.createElement('div');
+      grid.className = 'game-grid';
+      Games.all
+        .filter(g => (g.age ?? 2) === age)
+        .forEach(game => grid.appendChild(makeGameToggle(game)));
+      group.append(heading, grid);
+      list.appendChild(group);
     });
+
+    updateStartState();
   }
 
-  function makeMenuButton(iconText, labelText, accent) {
+  // A single tickable game card. Toggling it updates the persisted selection.
+  function makeGameToggle(game) {
+    const idx = Games.all.indexOf(game);
     const btn = document.createElement('button');
-    btn.className = 'game-button';
-    btn.style.setProperty('--accent', accent);
+    btn.type = 'button';
+    btn.className = 'game-toggle';
+    btn.style.setProperty('--accent', ACCENTS[idx % ACCENTS.length]);
+
+    const check = document.createElement('span');
+    check.className = 'game-check';
+    check.textContent = '✓';
     const icon = document.createElement('span');
     icon.className = 'game-icon';
-    icon.textContent = iconText;
+    icon.textContent = game.icon;
     const label = document.createElement('span');
-    label.textContent = labelText;
-    btn.append(icon, label);
+    label.className = 'game-toggle-label';
+    label.textContent = I18N.t(`games.${game.id}`);
+    btn.append(icon, label, check);
+
+    const sync = () => {
+      const on = selected.has(game.id);
+      btn.classList.toggle('selected', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    };
+    sync();
+
+    // First tap also unlocks iOS audio for the coming session
     btn.addEventListener('pointerdown', () => SoundKit.unlock(), { once: true });
+    btn.addEventListener('click', () => {
+      if (selected.has(game.id)) selected.delete(game.id);
+      else selected.add(game.id);
+      saveSelection();
+      sync();
+      updateStartState();
+    });
     return btn;
+  }
+
+  function updateStartState() {
+    $('#start-btn').disabled = selected.size === 0;
+  }
+
+  /** Start playing the ticked games. One game → play it straight; several →
+      rotate through them (shuffled) like the old surprise mode. */
+  function startSelected() {
+    SoundKit.unlock();
+    const chosen = Games.all.filter(g => selected.has(g.id));
+    if (chosen.length === 0) return;
+    session.answered = 0;
+    if (chosen.length === 1) playGame(chosen[0]);
+    else startRolling(chosen);
   }
 
   /* ---------- navigation ---------- */
@@ -151,9 +221,9 @@ const App = (() => {
 
   /* ---------- rolling ("surprise") mode ---------- */
 
-  function startRolling() {
+  function startRolling(games = Games.all) {
     rolling = {
-      order: [...Games.all].sort(() => Math.random() - 0.5),
+      order: [...games].sort(() => Math.random() - 0.5),
       idx: 0,
     };
     session.answered = 0;
@@ -210,7 +280,7 @@ const App = (() => {
     select.value = I18N.lang;
     select.addEventListener('change', () => {
       I18N.setLang(select.value);
-      renderMenu();
+      renderConfig();
     });
 
     const limitSel = $('#limit-select');
@@ -288,10 +358,12 @@ const App = (() => {
   /* ---------- boot ---------- */
 
   document.addEventListener('DOMContentLoaded', () => {
-    renderMenu();
+    selected = loadSelection();
+    renderConfig();
     setupSettings();
     setupExitZone();
     setupCredits();
+    $('#start-btn').addEventListener('click', startSelected);
   });
 
   return { confetti, exitToMenu };

@@ -157,8 +157,12 @@ img { pointer-events: none; -webkit-user-drag: none; }
 /* ---------- menu ---------- */
 /* Menu lays out top-to-bottom: title, game grid, then the parent bar pinned
    to the bottom via margin-top:auto (so it never overlaps the cards). */
+/* The config screen is parent-facing, so unlike the game screens it is allowed
+   to scroll when the list + options are taller than the viewport. */
 #menu-screen {
   justify-content: flex-start;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .menu-title {
@@ -168,52 +172,138 @@ img { pointer-events: none; -webkit-user-drag: none; }
   margin: 4px 0 clamp(16px, 4vh, 28px);
 }
 
-/* Responsive grid: always at least 2 columns on a phone, more on a tablet.
-   auto-fit keeps the cards a comfortable size without ever stacking 1-wide. */
-.game-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(clamp(130px, 40vw, 170px), 1fr));
-  gap: clamp(14px, 3vw, 24px);
-  justify-content: center;
-  width: 100%;
-  max-width: 640px;
+/* ---------- config screen ---------- */
+
+/* Quiet subtitle above the tickable game groups. */
+.config-subtitle {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--ink-soft);
+  margin: -8px 0 clamp(14px, 3vh, 22px);
 }
 
-.game-button {
+.game-config {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
+  gap: clamp(14px, 3vh, 22px);
   width: 100%;
-  aspect-ratio: 1 / 1;
-  border: none;
-  border-radius: var(--radius);
+  max-width: 520px;
+}
+
+.age-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.age-heading {
+  font-weight: 800;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  text-align: left;
+  margin: 0 0 2px 2px;
+}
+
+/* One column of rows on a phone; two on a wide tablet. */
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 8px;
+}
+
+/* A compact, parent-facing tickable row: checkbox + icon + name. Muted when
+   unticked; accent ring + filled check when included in the session. */
+.game-toggle {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 11px 15px;
+  border: 2px solid transparent;
+  border-radius: 16px;
   background: var(--card);
   box-shadow: var(--shadow);
   font-family: inherit;
   font-weight: 800;
-  font-size: clamp(1rem, 3vw, 1.3rem);
+  font-size: 1.05rem;
   color: var(--ink);
+  text-align: left;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  opacity: 0.7;
+  transition: transform 0.12s ease, box-shadow 0.12s ease,
+              opacity 0.15s ease, border-color 0.15s ease;
 }
-.game-button:active {
+.game-toggle:active {
+  transform: scale(0.98);
+  box-shadow: var(--shadow-press);
+}
+.game-toggle.selected {
+  opacity: 1;
+  border-color: var(--accent, var(--sage));
+}
+.game-toggle .game-icon {
+  font-size: 1.9rem;
+  line-height: 1;
+  flex: none;
+}
+.game-toggle-label {
+  flex: 1;
+  line-height: 1.2;
+}
+/* Checkbox affordance: an empty ring when unticked, filled accent + check when ticked. */
+.game-check {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid rgba(74, 68, 64, 0.22);
+  background: transparent;
+  color: transparent;
+  font-size: 0.8rem;
+  line-height: 20px;
+  text-align: center;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.game-toggle.selected .game-check {
+  border-color: var(--accent, var(--sage));
+  background: var(--accent, var(--sage));
+  color: #fff;
+}
+
+/* ---------- config options + start ---------- */
+
+.config-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px 24px;
+  margin: clamp(20px, 5vh, 34px) 0 clamp(16px, 4vh, 24px);
+}
+
+.start-btn {
+  font-family: inherit;
+  font-weight: 800;
+  font-size: clamp(1.2rem, 4vw, 1.6rem);
+  color: var(--ink);
+  background: var(--butter);
+  border: none;
+  border-radius: 999px;
+  padding: 16px clamp(40px, 12vw, 72px);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+.start-btn:active {
   transform: scale(0.96);
   box-shadow: var(--shadow-press);
 }
-.game-button .game-icon {
-  font-size: clamp(3rem, 10vw, 4.5rem);
-  line-height: 1;
-}
-/* each game gets a soft colored top edge, like a book spine */
-.game-button::before {
-  content: '';
-  width: 56px;
-  height: 8px;
-  border-radius: 4px;
-  background: var(--accent, var(--sage));
-  margin-bottom: 2px;
+.start-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+  transform: none;
 }
 
 /* ---------- parent bar ---------- */

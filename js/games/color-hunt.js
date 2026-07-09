@@ -96,6 +96,7 @@
   Games.register({
     id: 'color-hunt',
     icon: '🎈',
+    age: 2,
     start(el, o = {}) {
       container = el;
       opts = o;

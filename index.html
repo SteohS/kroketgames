@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800&display=swap" rel="stylesheet" />
   <!-- ?v bumped whenever styles.css changes, to bust Safari's aggressive cache -->
-  <link rel="stylesheet" href="css/styles.css?v=4" />
+  <link rel="stylesheet" href="css/styles.css?v=6" />
 </head>
 <body>
 
@@ -34,12 +34,13 @@
   <!-- ============ MENU SCREEN ============ -->
   <main id="menu-screen" class="screen">
     <h1 id="menu-title" class="menu-title">Mini&nbsp;Games</h1>
-    <div id="game-list" class="game-list">
-      <!-- Game buttons injected by app.js from the Games registry -->
-    </div>
+    <p id="choose-games" class="config-subtitle">Choose games</p>
 
-    <!-- Parent corner: small, bottom of screen, deliberately un-shiny -->
-    <footer class="parent-bar">
+    <!-- Age-grouped, tickable game cards injected by app.js from the registry -->
+    <div id="game-list" class="game-config"></div>
+
+    <!-- Parent options: language + session length, below the games -->
+    <div class="config-options">
       <div class="parent-field">
         <label class="lang-label" for="lang-select" id="lang-label">Voice</label>
         <select id="lang-select" class="lang-select">
@@ -58,6 +59,13 @@
           <option value="20">20</option>
         </select>
       </div>
+    </div>
+
+    <!-- The one big deliberate action: start playing the ticked games -->
+    <button id="start-btn" class="start-btn" type="button">Play</button>
+
+    <!-- Parent corner: small, bottom of screen, deliberately un-shiny -->
+    <footer class="parent-bar">
       <button id="credits-btn" class="credits-btn" type="button">Credits</button>
     </footer>
   </main>

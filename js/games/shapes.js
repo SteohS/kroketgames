@@ -93,6 +93,7 @@
   Games.register({
     id: 'shapes',
     icon: '⭐',
+    age: 3,
     start(el, o = {}) {
       container = el;
       opts = o;

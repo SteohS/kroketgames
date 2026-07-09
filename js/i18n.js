@@ -7,6 +7,9 @@ const I18N = (() => {
   const STRINGS = {
     fr: {
       menuTitle: 'Petits jeux',
+      chooseGames: 'Choisis les jeux',
+      startLabel: 'Jouer',
+      ageBands: { 2: 'Dès 2 ans', 3: 'Dès 3 ans', 4: 'Dès 4 ans' },
       voiceLabel: 'Voix',
       limitLabel: 'Questions',
       creditsLabel: 'Crédits',
@@ -37,6 +40,9 @@ const I18N = (() => {
     },
     nl: {
       menuTitle: 'Spelletjes',
+      chooseGames: 'Kies de spelletjes',
+      startLabel: 'Spelen',
+      ageBands: { 2: 'Vanaf 2 jaar', 3: 'Vanaf 3 jaar', 4: 'Vanaf 4 jaar' },
       voiceLabel: 'Stem',
       limitLabel: 'Vragen',
       creditsLabel: 'Bronnen',
@@ -66,6 +72,9 @@ const I18N = (() => {
     },
     en: {
       menuTitle: 'Mini Games',
+      chooseGames: 'Choose games',
+      startLabel: 'Play',
+      ageBands: { 2: 'Age 2+', 3: 'Age 3+', 4: 'Age 4+' },
       voiceLabel: 'Voice',
       limitLabel: 'Questions',
       creditsLabel: 'Credits',

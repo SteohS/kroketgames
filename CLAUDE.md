@@ -15,8 +15,8 @@ hosted on GitHub Pages, used on iPad & iPhone (Safari).
 - **Toddler-proof controls**: no visible back/menu buttons inside a game. Exit = long-press
   (3 s) on the top-left corner zone (shows a filling ring for the parent). Pinch-zoom,
   text selection, pull-to-refresh and double-tap zoom are disabled.
-- **Audio unlock**: iOS blocks audio until a user gesture — the menu's game buttons count
-  as that gesture; TTS/audio is initialized on first tap.
+- **Audio unlock**: iOS blocks audio until a user gesture — tapping a game tile on the
+  config screen (or Start) counts as that gesture; TTS/audio is initialized on first tap.
 - **Real illustrations, not emoji**: emoji are only a *fallback* while image assets are
   missing (see asset conventions below). Parent will source CC0 art (e.g. Kenney.nl).
 - **No offline / service worker for now.** PWA manifest yes (fullscreen on home screen).
@@ -25,9 +25,9 @@ hosted on GitHub Pages, used on iPad & iPhone (Safari).
 ## Architecture
 
 ```
-index.html            shell: menu screen + game container + settings
+index.html            shell: config screen (game picker + settings) + game container
 css/styles.css        design tokens + all styling
-js/app.js             navigation, settings, long-press exit, confetti
+js/app.js             config screen, game selection, navigation, settings, long-press exit, confetti
 js/audio.js           SoundKit: TTS wrapper + WebAudio synth dings + file playback
 js/i18n.js            all user-facing strings & praise phrases (fr/nl/en)
 js/data/animals.js    shared animal registry (names per language, asset paths, emoji fallback)
@@ -38,24 +38,33 @@ assets/audio/...      animal sounds + UI sounds (optional overrides for synth so
 
 ### Adding a new game
 
-1. Create `js/games/<name>.js`, call `Games.register({ id, icon, start(container, opts), stop() })`.
-2. Add its `<script>` tag to `index.html` (registration order = menu order) and its
-   title to `js/i18n.js` (`games.<id>`).
+1. Create `js/games/<name>.js`, call
+   `Games.register({ id, icon, age, start(container, opts), stop() })`.
+   `age` (2/3/4) picks which age band the game is grouped under on the config screen.
+2. Add its `<script>` tag to `index.html` (registration order = order within its age
+   band) and its title to `js/i18n.js` (`games.<id>`). If you introduce a new age
+   band, add its label to `i18n.js` (`ageBands.<n>`).
 3. Reuse `SoundKit` for all audio and the `js/data/*` registries — assets are shared.
 4. **Support rolling mode**: `opts` may contain `{ rounds, onCycleComplete }`. After
    `rounds` correct answers, call `opts.onCycleComplete()` instead of starting a new
    round (see shapes.js for the pattern). `stop()` must silence the game immediately.
 
-### Rolling ("Surprise") mode
+### Config screen (home) & rolling mode
 
-The 🎲 button on the menu shuffles all registered games and rotates through them,
-`ROLLING_ROUNDS` (3) correct answers per game, looping forever until the parent
-exits. Implemented in app.js (`startRolling`/`rollNext`); games only need to honor
-the opts contract above.
+The home screen is a parent-facing **configuration** page (`renderConfig` in app.js):
+games are shown as tickable cards grouped by age band (`ageBands` labels), plus the
+voice + questions options and a **Start** button. The ticked set is persisted as
+`selectedGames` (defaults to all on first visit). Start:
+- **one game ticked** → plays it straight (`playGame`);
+- **several ticked** → shuffles them and rotates, `ROLLING_ROUNDS` (3) correct
+  answers per game, looping forever until the parent exits (`startRolling`/`rollNext`).
+
+Games only need to honor the opts contract above. (There is no separate 🎲 button
+anymore — ticking every game is the old "surprise" behavior.)
 
 ### Session limit ("Questions" dropdown)
 
-Optional parent control on the menu (persisted as `questionLimit`): ∞ (default,
+Optional parent control on the config screen (persisted as `questionLimit`): ∞ (default,
 unlimited) or a cap of 5/10/15/20 correct answers. app.js implements it purely
 through the existing `rounds`/`onCycleComplete` contract — **games need no changes**.
 Single game: launched with `rounds = limit`. Rolling: each leg runs
