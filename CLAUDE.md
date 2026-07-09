@@ -88,10 +88,11 @@ big emoji; `SoundKit.playAnimal()` falls back to TTS onomatopoeia. Dropping real
 3. ✅ **Counting taps** (`counting`) — "tap three apples!", voice counts along each
    tap, celebrate when all are counted (asset-free via emoji; upgrade by dropping
    files in assets/images/objects/).
-4. ✅ **Free-play animal board** (`free-play`) — grid of every animal; tapping any
-   plays its sound then speaks its name (no quiz, no fail states). Asset-free via
-   emoji + TTS fallbacks. Each tap counts as one "answer" so rolling mode and the
-   session limit work unchanged.
+4. ✅ **Discover the animals** (`free-play`) — a spoken question ("Discover the
+   animals!") over a trio of 3 animals; tapping any plays its sound then speaks
+   its name (no quiz, no fail states). Once all 3 are discovered a fresh trio
+   fades in. Asset-free via emoji + TTS fallbacks. Each completed trio counts as
+   one "answer" so rolling mode and the session limit work unchanged.
 5. ✅ **Color hunt** (`color-hunt`) — "find the red balloon!", 3 differently-
    colored balloons; right = celebrate + speak the color name to reinforce it,
    wrong = gentle wiggle. Fully procedural SVG (6 colors), zero assets.

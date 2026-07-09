@@ -1,31 +1,66 @@
 /* ==========================================================================
-   Game: Free-play animal board ("La ferme")
-   A calm grid of every animal. Tapping any one plays its sound and then
+   Game: Discover the animals ("Découvre")
+   A calm round of THREE animals with a spoken question at the top
+   ("Découvre les animaux !"). Tapping an animal plays its sound and then
    speaks its name — pure exploration, no quiz, no wrong answers, no confetti.
-   Each tap counts as one "answer", so the game still honors rolling mode and
-   the session limit: after `opts.rounds` taps it calls opts.onCycleComplete()
-   (see app.js). stop() silences it immediately.
+   Once all three have been discovered a fresh trio slides in.
+   A completed trio counts as ONE "answer" (discovering 3 animals is one round),
+   so the game honors rolling mode and the session limit: after `opts.rounds`
+   completed trios it calls opts.onCycleComplete() (see app.js). stop() silences
+   it immediately.
    ========================================================================== */
 
 (() => {
+  const CARD_COUNT = 3;
   let container = null;
   let opts = {};
-  let tapCount = 0;
-  let busy = false;   // true once the leg/session cap is hit — ignore later taps
-  let alive = false;  // false once the game is stopped
+  let roundCount = 0;      // completed trios this session (the "answer" count)
+  let remaining = 0;       // animals not yet discovered in the current trio
+  let busy = false;        // true while a transition is pending or the cap is hit
+  let alive = false;       // false once the game is stopped
 
-  function build() {
+  function promptText() {
+    return I18N.t('discoverPrompt');
+  }
+
+  async function playPrompt() {
+    if (!alive) return;
+    await SoundKit.speak(promptText());
+  }
+
+  function newTrio() {
+    if (!alive) return;
+    busy = false;
+    remaining = CARD_COUNT;
+
+    const picked = AnimalRegistry.pick(CARD_COUNT);
+
     container.innerHTML = '';
-    const board = document.createElement('div');
-    board.className = 'animal-board fade-in';
-    AnimalRegistry.all.forEach(animal => {
-      const tile = document.createElement('button');
-      tile.className = 'board-tile';
-      tile.appendChild(AnimalRegistry.artFor(animal));
-      tile.addEventListener('click', () => onTap(tile, animal));
-      board.appendChild(tile);
+
+    const bar = document.createElement('div');
+    bar.className = 'prompt-bar';
+    const replay = document.createElement('button');
+    replay.className = 'replay-button';
+    replay.textContent = '🔊';
+    replay.addEventListener('click', () => { if (!busy) playPrompt(); });
+    bar.appendChild(replay);
+    const label = document.createElement('span');
+    label.className = 'prompt-text';
+    label.textContent = promptText();
+    bar.appendChild(label);
+
+    const row = document.createElement('div');
+    row.className = 'card-row fade-in';
+    picked.forEach(animal => {
+      const card = document.createElement('button');
+      card.className = 'animal-card';
+      card.appendChild(AnimalRegistry.artFor(animal));
+      card.addEventListener('click', () => onTap(card, animal, row));
+      row.appendChild(card);
     });
-    container.appendChild(board);
+
+    container.append(bar, row);
+    playPrompt();
   }
 
   function pop(el) {
@@ -34,23 +69,40 @@
     el.classList.add('count-pop');
   }
 
-  async function onTap(tile, animal) {
-    if (busy || !alive) return;
-    pop(tile);
-    tapCount++;
+  async function onTap(card, animal, row) {
+    if (!alive) return;
+    // Re-tapping an already-discovered animal just replays it (no count, no
+    // rotation) — but ignore taps entirely once a transition/cap is pending.
+    const firstTime = !card.classList.contains('discovered');
+    if (busy && firstTime) return;
 
-    // Did this tap reach the rolling-leg / session cap? Rotate after the sound
-    // so the child always hears the animal they just tapped. busy is set now
-    // (synchronously, before awaiting) so no later tap can double-fire it.
-    const done = opts.rounds && tapCount >= opts.rounds && opts.onCycleComplete;
-    if (done) busy = true;
+    pop(card);
+
+    // A completed trio is one round. Mark it now (synchronously) so no later
+    // tap can double-count it or double-fire onCycleComplete.
+    let trioDone = false;
+    if (firstTime) {
+      card.classList.add('discovered');
+      remaining--;
+      if (remaining <= 0) { busy = true; trioDone = true; }
+    }
 
     await SoundKit.playAnimal(animal.id);
     if (!alive) return;
     await SoundKit.speak(AnimalRegistry.nameOf(animal));
     if (!alive) return;
 
-    if (done) opts.onCycleComplete();
+    if (!trioDone) return;
+
+    // Whole trio discovered = one "answer" toward the rolling leg / session cap.
+    roundCount++;
+    if (opts.rounds && roundCount >= opts.rounds && opts.onCycleComplete) {
+      opts.onCycleComplete();
+    } else {
+      // Gently swap in a fresh trio.
+      row.classList.add('fade-out');
+      setTimeout(() => { if (alive) newTrio(); }, 500);
+    }
   }
 
   Games.register({
@@ -60,10 +112,10 @@
     start(el, o = {}) {
       container = el;
       opts = o;
-      tapCount = 0;
+      roundCount = 0;
       busy = false;
       alive = true;
-      build();
+      newTrio();
     },
     stop() {
       alive = false;

@@ -503,6 +503,8 @@ img { pointer-events: none; -webkit-user-drag: none; }
   transition: transform 0.15s ease;
 }
 .animal-card:active { transform: scale(0.96); }
+/* softly fade an animal once it has been discovered (see free-play game) */
+.animal-card.discovered { opacity: 0.5; transition: opacity 0.4s ease; }
 
 .animal-card .art {
   width: 100%;
