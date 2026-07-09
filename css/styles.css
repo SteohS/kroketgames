@@ -448,6 +448,54 @@ img { pointer-events: none; -webkit-user-drag: none; }
   100% { transform: scale(1); }
 }
 
+/* ---------- free-play animal board ---------- */
+/* Every animal at once, wrapping into a tidy grid. Tiles size off both
+   viewport width and height (min(...,34vh)) so all 8 always fit the fixed,
+   non-scrolling screen in portrait or landscape. No quiz here, so no badges. */
+.animal-board {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(10px, 2.5vw, 24px);
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 820px;
+}
+
+.board-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(clamp(84px, 20vw, 156px), 34vh);
+  aspect-ratio: 1 / 1;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  padding: 10px;
+  transition: transform 0.15s ease;
+}
+.board-tile:active { transform: scale(0.94); }
+
+.board-tile .art {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  background: var(--tint, var(--paper));
+  font-size: clamp(2.8rem, 9vw, 4.4rem); /* emoji fallback size */
+  overflow: hidden;
+}
+.board-tile .art img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 8%;
+}
+
 /* ---------- feedback animations ---------- */
 .wiggle { animation: wiggle 0.45s ease; }
 @keyframes wiggle {
