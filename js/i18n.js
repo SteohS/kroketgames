@@ -8,7 +8,9 @@ const I18N = (() => {
     fr: {
       menuTitle: 'Petits jeux',
       voiceLabel: 'Voix',
+      limitLabel: 'Questions',
       surpriseTitle: 'Surprise !',
+      allDone: 'C’est fini ! Bravo !',
       games: {
         'shapes': 'Les formes',
         'animal-sounds': 'Les animaux',
@@ -28,7 +30,9 @@ const I18N = (() => {
     nl: {
       menuTitle: 'Spelletjes',
       voiceLabel: 'Stem',
+      limitLabel: 'Vragen',
       surpriseTitle: 'Verrassing!',
+      allDone: 'Klaar! Goed gedaan!',
       games: {
         'shapes': 'De vormen',
         'animal-sounds': 'De dieren',
@@ -47,7 +51,9 @@ const I18N = (() => {
     en: {
       menuTitle: 'Mini Games',
       voiceLabel: 'Voice',
+      limitLabel: 'Questions',
       surpriseTitle: 'Surprise!',
+      allDone: 'All done! Well done!',
       games: {
         'shapes': 'Shapes',
         'animal-sounds': 'Animals',

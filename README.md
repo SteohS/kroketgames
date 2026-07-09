@@ -49,5 +49,8 @@ when handing over the iPad.
 ## In-app parent controls
 
 - Language dropdown (FR/NL/EN) at the bottom of the menu screen.
-- To exit a game: **press and hold the top-left corner for 3 seconds**
-  (a small ring fills up as you hold).
+- **Questions** dropdown next to it: ∞ (default, plays forever) or a cap of
+  5/10/15/20. When set, any game — including Surprise mode — stops after that
+  many correct answers and shows a "well done!" screen. The choice is remembered.
+- To exit a game (or the well-done screen): **press and hold the top-left corner
+  for 3 seconds** (a small ring fills up as you hold). This is the only way out.

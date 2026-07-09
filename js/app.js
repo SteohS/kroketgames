@@ -25,6 +25,15 @@ const App = (() => {
   let currentGame = null;
   let rolling = null; // { order: [...games], idx } while surprise mode is active
 
+  // Optional parent-set session limit: after N correct answers ("questions")
+  // the game stops and a congrats screen appears whose only exit is the
+  // long-press parent corner. null = unlimited (play forever).
+  function loadLimit() {
+    const v = localStorage.getItem('questionLimit');
+    return v ? parseInt(v, 10) : null;
+  }
+  let session = { limit: loadLimit(), answered: 0 };
+
   const $ = sel => document.querySelector(sel);
 
   /* ---------- menu ---------- */
@@ -32,6 +41,7 @@ const App = (() => {
   function renderMenu() {
     $('#menu-title').textContent = I18N.t('menuTitle');
     $('#lang-label').textContent = I18N.t('voiceLabel');
+    $('#limit-label').textContent = I18N.t('limitLabel');
 
     const list = $('#game-list');
     list.innerHTML = '';
@@ -45,7 +55,7 @@ const App = (() => {
 
     Games.all.forEach((game, i) => {
       const btn = makeMenuButton(game.icon, I18N.t(`games.${game.id}`), ACCENTS[i % ACCENTS.length]);
-      btn.addEventListener('click', () => openGame(game));
+      btn.addEventListener('click', () => playGame(game));
       list.appendChild(btn);
     });
   }
@@ -77,14 +87,49 @@ const App = (() => {
     game.start(container, opts);
   }
 
+  /** Launch a single game from the menu, honoring the session limit if set. */
+  function playGame(game) {
+    rolling = null;
+    session.answered = 0;
+    openGame(game, session.limit
+      ? { rounds: session.limit, onCycleComplete: finishSession }
+      : {});
+  }
+
   function exitToMenu() {
     rolling = null;
+    session.answered = 0;
     if (currentGame?.stop) currentGame.stop();
     currentGame = null;
     speechSynthesis?.cancel();
     $('#game-container').innerHTML = '';
     $('#game-screen').classList.add('hidden');
     $('#menu-screen').classList.remove('hidden');
+  }
+
+  /** Session limit reached: stop the game and celebrate the whole session.
+      Deliberately has NO buttons — the long-press parent corner (still active
+      on the game screen) is the only way back to the menu. */
+  function finishSession() {
+    rolling = null;
+    if (currentGame?.stop) currentGame.stop();
+    currentGame = null;
+
+    const container = $('#game-container');
+    container.innerHTML = '';
+    const wrap = document.createElement('div');
+    wrap.className = 'congrats fade-in';
+    const emoji = document.createElement('div');
+    emoji.className = 'congrats-emoji bounce';
+    emoji.textContent = '🎉';
+    const text = document.createElement('div');
+    text.className = 'congrats-text';
+    text.textContent = I18N.t('allDone');
+    wrap.append(emoji, text);
+    container.appendChild(wrap);
+
+    confetti(60);
+    SoundKit.success().then(() => SoundKit.speak(I18N.t('allDone')));
   }
 
   /* ---------- rolling ("surprise") mode ---------- */
@@ -94,16 +139,25 @@ const App = (() => {
       order: [...Games.all].sort(() => Math.random() - 0.5),
       idx: 0,
     };
+    session.answered = 0;
     rollNext();
   }
 
   function rollNext() {
     if (!rolling) return; // exited meanwhile
+    if (session.limit && session.answered >= session.limit) return finishSession();
+
+    // Correct answers to run this leg before rotating: normally ROLLING_ROUNDS,
+    // but capped so the session ends exactly on the limit (not a multiple of it).
+    const legRounds = session.limit
+      ? Math.min(ROLLING_ROUNDS, session.limit - session.answered)
+      : ROLLING_ROUNDS;
+
     const game = rolling.order[rolling.idx % rolling.order.length];
     rolling.idx++;
     openGame(game, {
-      rounds: ROLLING_ROUNDS,
-      onCycleComplete: rollNext,
+      rounds: legRounds,
+      onCycleComplete: () => { session.answered += legRounds; rollNext(); },
     });
   }
 
@@ -140,6 +194,15 @@ const App = (() => {
     select.addEventListener('change', () => {
       I18N.setLang(select.value);
       renderMenu();
+    });
+
+    const limitSel = $('#limit-select');
+    limitSel.value = session.limit ? String(session.limit) : '';
+    limitSel.addEventListener('change', () => {
+      const v = limitSel.value;
+      session.limit = v ? parseInt(v, 10) : null;
+      if (v) localStorage.setItem('questionLimit', v);
+      else localStorage.removeItem('questionLimit');
     });
   }
 

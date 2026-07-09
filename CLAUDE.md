@@ -53,6 +53,17 @@ The 🎲 button on the menu shuffles all registered games and rotates through th
 exits. Implemented in app.js (`startRolling`/`rollNext`); games only need to honor
 the opts contract above.
 
+### Session limit ("Questions" dropdown)
+
+Optional parent control on the menu (persisted as `questionLimit`): ∞ (default,
+unlimited) or a cap of 5/10/15/20 correct answers. app.js implements it purely
+through the existing `rounds`/`onCycleComplete` contract — **games need no changes**.
+Single game: launched with `rounds = limit`. Rolling: each leg runs
+`min(ROLLING_ROUNDS, remaining)` so the session ends exactly on the limit. On
+completion, `finishSession()` swaps the game container for a boring-calm congrats
+screen (🎉 + `allDone` string); it has no buttons — the long-press corner is the
+only exit. This is a session-length cap, not scores/progression.
+
 ### Asset fallback rule
 
 Games must work with **zero assets present**. `AnimalRegistry.imageFor()` falls back to a

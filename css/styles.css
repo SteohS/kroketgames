@@ -113,8 +113,11 @@ img { pointer-events: none; -webkit-user-drag: none; }
   position: absolute;
   bottom: max(14px, env(safe-area-inset-bottom));
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  gap: 8px 12px;
+  max-width: 92vw;
   opacity: 0.75;
 }
 .lang-label {
@@ -358,6 +361,26 @@ img { pointer-events: none; -webkit-user-drag: none; }
 }
 @keyframes confetti-fall {
   to { transform: translateY(110vh) rotate(540deg); }
+}
+
+/* ---------- session-complete (congrats) screen ---------- */
+.congrats {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  text-align: center;
+  padding: 24px;
+}
+.congrats-emoji {
+  font-size: clamp(5rem, 20vw, 9rem);
+  line-height: 1;
+}
+.congrats-text {
+  font-weight: 800;
+  font-size: clamp(1.6rem, 6vw, 2.6rem);
+  max-width: 14ch;
 }
 
 /* ---------- reduced motion ---------- */
