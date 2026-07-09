@@ -113,7 +113,7 @@
   Games.register({
     id: 'counting',
     icon: '🔢',
-    age: 4,
+    age: 2,
     start(el, o = {}) {
       container = el;
       opts = o;

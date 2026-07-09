@@ -446,14 +446,31 @@ img { pointer-events: none; -webkit-user-drag: none; }
   left: 16px;
   width: 40px;
   height: 40px;
-  opacity: 0;
+  opacity: 0.4; /* slightly visible at rest so the parent can find it */
   transform: rotate(-90deg);
   transition: opacity 0.2s;
 }
 #exit-zone.pressing #exit-ring { opacity: 1; }
+#exit-label {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.55);
+  pointer-events: none;
+  transition: color 0.2s;
+}
+#exit-zone.pressing #exit-label { color: rgba(255, 255, 255, 0.9); }
 #exit-ring .ring-bg {
   fill: none;
-  stroke: rgba(74, 68, 64, 0.15);
+  stroke: rgba(74, 68, 64, 0.25);
   stroke-width: 5;
 }
 #exit-ring .ring-fill {
