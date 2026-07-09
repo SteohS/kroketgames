@@ -12,42 +12,31 @@
 
 (() => {
   const CARD_COUNT = 3;
+  const kit = GameKit.session();
   let container = null;
   let opts = {};
   let roundCount = 0;      // completed trios this session (the "answer" count)
   let remaining = 0;       // animals not yet discovered in the current trio
   let busy = false;        // true while a transition is pending or the cap is hit
-  let alive = false;       // false once the game is stopped
 
   function promptText() {
     return I18N.t('discoverPrompt');
   }
 
   async function playPrompt() {
-    if (!alive) return;
+    if (!kit.alive) return;
     await SoundKit.speak(promptText());
   }
 
   function newTrio() {
-    if (!alive) return;
+    if (!kit.alive) return;
     busy = false;
     remaining = CARD_COUNT;
 
     const picked = AnimalRegistry.pick(CARD_COUNT);
 
     container.innerHTML = '';
-
-    const bar = document.createElement('div');
-    bar.className = 'prompt-bar';
-    const replay = document.createElement('button');
-    replay.className = 'replay-button';
-    replay.textContent = '🔊';
-    replay.addEventListener('click', () => { if (!busy) playPrompt(); });
-    bar.appendChild(replay);
-    const label = document.createElement('span');
-    label.className = 'prompt-text';
-    label.textContent = promptText();
-    bar.appendChild(label);
+    const bar = GameKit.promptBar(promptText(), () => { if (!busy) playPrompt(); });
 
     const row = document.createElement('div');
     row.className = 'card-row fade-in';
@@ -63,20 +52,14 @@
     playPrompt();
   }
 
-  function pop(el) {
-    el.classList.remove('count-pop');
-    void el.offsetWidth; // restart animation
-    el.classList.add('count-pop');
-  }
-
   async function onTap(card, animal, row) {
-    if (!alive) return;
+    if (!kit.alive) return;
     // Re-tapping an already-discovered animal just replays it (no count, no
     // rotation) — but ignore taps entirely once a transition/cap is pending.
     const firstTime = !card.classList.contains('discovered');
     if (busy && firstTime) return;
 
-    pop(card);
+    GameKit.restartAnim(card, 'count-pop');
 
     // A completed trio is one round. Mark it now (synchronously) so no later
     // tap can double-count it or double-fire onCycleComplete.
@@ -88,9 +71,9 @@
     }
 
     await SoundKit.playAnimal(animal.id);
-    if (!alive) return;
+    if (!kit.alive) return;
     await SoundKit.speak(AnimalRegistry.nameOf(animal));
-    if (!alive) return;
+    if (!kit.alive) return;
 
     if (!trioDone) return;
 
@@ -101,7 +84,7 @@
     } else {
       // Gently swap in a fresh trio.
       row.classList.add('fade-out');
-      setTimeout(() => { if (alive) newTrio(); }, 500);
+      kit.after(500, newTrio);
     }
   }
 
@@ -114,12 +97,12 @@
       opts = o;
       roundCount = 0;
       busy = false;
-      alive = true;
+      kit.start();
       newTrio();
     },
     stop() {
-      alive = false;
       busy = false;
+      kit.stop();
     },
   });
 })();

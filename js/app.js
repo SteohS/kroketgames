@@ -45,8 +45,9 @@ const App = (() => {
   // the game stops and a congrats screen appears whose only exit is the
   // long-press parent corner. null = unlimited (play forever).
   function loadLimit() {
-    const v = localStorage.getItem('questionLimit');
-    return v ? parseInt(v, 10) : null;
+    const n = parseInt(localStorage.getItem('questionLimit'), 10);
+    // Only a positive integer is a real cap; anything else = unlimited.
+    return Number.isInteger(n) && n > 0 ? n : null;
   }
   let session = { limit: loadLimit(), answered: 0 };
 
@@ -166,6 +167,7 @@ const App = (() => {
   function openGame(game, opts = {}) {
     SoundKit.unlock();
     if (currentGame?.stop) currentGame.stop();
+    SoundKit.stop(); // silence the outgoing game before the next one starts
     currentGame = game;
     $('#menu-screen').classList.add('hidden');
     $('#game-screen').classList.remove('hidden');
@@ -188,7 +190,7 @@ const App = (() => {
     session.answered = 0;
     if (currentGame?.stop) currentGame.stop();
     currentGame = null;
-    speechSynthesis?.cancel();
+    SoundKit.stop(); // cut any in-flight speech / animal sound immediately
     $('#game-container').innerHTML = '';
     $('#game-screen').classList.add('hidden');
     $('#menu-screen').classList.remove('hidden');
@@ -200,6 +202,7 @@ const App = (() => {
   function finishSession() {
     rolling = null;
     if (currentGame?.stop) currentGame.stop();
+    SoundKit.stop(); // silence the game before the congrats sound plays
     currentGame = null;
 
     const container = $('#game-container');
@@ -338,15 +341,14 @@ const App = (() => {
 
   /* ---------- shared confetti ---------- */
 
-  const CONFETTI_COLORS = ['#A8C5A0', '#A9C7DE', '#F5D98B', '#EFA48B', '#C5B3D6'];
-
   function confetti(count = 26) {
+    const colors = GameKit.PALETTE; // single source of the pastel set
     const layer = $('#confetti-layer');
     for (let i = 0; i < count; i++) {
       const p = document.createElement('div');
       p.className = 'confetti-piece';
       p.style.left = Math.random() * 100 + 'vw';
-      p.style.background = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
+      p.style.background = colors[i % colors.length];
       p.style.animationDuration = 1.6 + Math.random() * 1.4 + 's';
       p.style.animationDelay = Math.random() * 0.3 + 's';
       p.style.transform = `rotate(${Math.random() * 360}deg)`;

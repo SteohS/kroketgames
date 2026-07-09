@@ -10,8 +10,10 @@
 
 const SoundKit = (() => {
   let ctx = null;               // AudioContext, created on unlock
+  let master = null;            // master gain; every synth tone routes through it
   let voices = [];              // cached speechSynthesis voices
   const fileCache = {};         // url -> HTMLAudioElement | 'missing'
+  const activeOscillators = new Set(); // synth voices currently scheduled/playing
 
   // iOS loads voices asynchronously
   function refreshVoices() { voices = speechSynthesis.getVoices(); }
@@ -33,7 +35,11 @@ const SoundKit = (() => {
   function unlock() {
     if (!ctx) {
       const AC = window.AudioContext || window.webkitAudioContext;
-      if (AC) ctx = new AC();
+      if (AC) {
+        ctx = new AC();
+        master = ctx.createGain();
+        master.connect(ctx.destination);
+      }
     }
     if (ctx && ctx.state === 'suspended') ctx.resume();
     // Warm up TTS on iOS with a silent utterance
@@ -42,6 +48,21 @@ const SoundKit = (() => {
       speechSynthesis.speak(u);
       unlock.warmed = true;
     }
+  }
+
+  /** Silence everything immediately: cancel speech, halt file playback, and
+      stop any scheduled/playing synth tones. Games call this from stop() so the
+      contract ("go silent immediately") holds even mid-utterance/mid-sound. */
+  function stop() {
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+    for (const el of Object.values(fileCache)) {
+      if (el && el !== 'missing') { el.pause(); el.currentTime = 0; }
+    }
+    for (const o of activeOscillators) {
+      try { o.stop(); } catch { /* already stopped */ }
+      try { o.disconnect(); } catch { /* noop */ }
+    }
+    activeOscillators.clear();
   }
 
   function speak(text, { rate = 0.9 } = {}) {
@@ -98,9 +119,11 @@ const SoundKit = (() => {
     g.gain.setValueAtTime(0, ctx.currentTime + start);
     g.gain.linearRampToValueAtTime(gainPeak, ctx.currentTime + start + 0.02);
     g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
-    o.connect(g).connect(ctx.destination);
+    o.connect(g).connect(master);
     o.start(ctx.currentTime + start);
     o.stop(ctx.currentTime + start + dur + 0.05);
+    activeOscillators.add(o);
+    o.onended = () => activeOscillators.delete(o);
   }
 
   async function success() {
@@ -125,5 +148,5 @@ const SoundKit = (() => {
     tone(880, 0, 0.09, 'sine', 0.15);
   }
 
-  return { unlock, speak, playAnimal, success, nope, pop };
+  return { unlock, stop, speak, playAnimal, success, nope, pop };
 })();

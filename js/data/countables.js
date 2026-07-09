@@ -23,20 +23,10 @@ const CountRegistry = (() => {
 
   /** Build the .art element: <img> if the file exists, emoji otherwise. */
   function artFor(obj) {
-    const div = document.createElement('div');
-    div.className = 'art';
-    div.style.setProperty('--tint', obj.tint);
-    div.textContent = obj.emoji; // fallback shown immediately
-
-    if (!missing.has(obj.id)) {
-      const img = document.createElement('img');
-      img.alt = '';
-      img.src = `assets/images/objects/${obj.id}.png`;
-      img.onload = () => { div.textContent = ''; div.appendChild(img); known.add(obj.id); };
-      img.onerror = () => { missing.add(obj.id); };
-      if (known.has(obj.id)) { div.textContent = ''; div.appendChild(img); }
-    }
-    return div;
+    return RegistryKit.imageArt({
+      id: obj.id, emoji: obj.emoji, tint: obj.tint,
+      alt: nameOf(obj), dir: 'assets/images/objects', known, missing,
+    });
   }
 
   function nameOf(obj) { return obj.name[I18N.lang]; }

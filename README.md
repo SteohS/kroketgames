@@ -20,24 +20,19 @@ fallback detection is more reliable over http.)
 2. Find your computer's local IP (`ipconfig getifaddr en0` on macOS).
 3. On the iPad, open `http://<that-ip>:8000` in Safari.
 
-## Deploy to GitHub Pages (first time)
+## Deploy to GitHub Pages
 
-1. Create a new repository on github.com (e.g. `kroketgames`), public.
-2. Push this folder to it:
-   ```bash
-   cd kroketgames
-   git init
-   git add .
-   git commit -m "First version: menu + animal sounds game"
-   git branch -M main
-   git remote add origin https://github.com/<your-username>/kroketgames.git
-   git push -u origin main
-   ```
-3. On github.com: repo → **Settings** → **Pages** →
-   Source: **Deploy from a branch** → Branch: **main**, folder **/ (root)** → Save.
-4. Wait ~1 minute. Your app is live at
-   `https://<your-username>.github.io/kroketgames/`.
-5. Every future `git push` updates the site automatically.
+The repo is already set up to publish from the `main` branch
+(**Settings → Pages → Deploy from a branch → main, folder / (root)**), so:
+
+```bash
+git push          # every push to main updates the live site (~1 min later)
+```
+
+The app is live at `https://<your-username>.github.io/kroketgames/`.
+
+> Bump the `?v=` query on the CSS/JS `<script>`/`<link>` tags in `index.html`
+> whenever you change those files, so Safari doesn't serve a stale cached copy.
 
 ## Install on the iPad like an app
 
@@ -49,9 +44,12 @@ when handing over the iPad.
 ## In-app parent controls
 
 - Language dropdown (FR/NL/EN) at the bottom of the menu screen.
+- Tick the games you want. One ticked → it plays on its own; several ticked →
+  they rotate (a fresh game every few correct answers) until you exit.
 - **Questions** dropdown next to it: ∞ (default, plays forever) or a cap of
-  5/10/15/20. When set, any game — including Surprise mode — stops after that
-  many correct answers and shows a "well done!" screen. The choice is remembered.
+  5/10/15/20. When set, play — whether a single game or the multi-game rotation —
+  stops after that many correct answers and shows a "well done!" screen. The
+  choice is remembered.
 - To exit a game (or the well-done screen): **press and hold the top-left corner
   for 3 seconds** (a small ring fills up as you hold). This is the only way out.
 - **Credits** link (also in the menu footer) opens a popup listing the third-party
