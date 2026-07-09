@@ -14,9 +14,13 @@
   let busy = false;
   let alive = false;
 
+  function promptText() {
+    return I18N.t('whereIs', { name: ShapeRegistry.nameOf(target.shape) });
+  }
+
   async function playPrompt() {
     if (!alive) return;
-    await SoundKit.speak(I18N.t('whereIs', { name: ShapeRegistry.nameOf(target.shape) }));
+    await SoundKit.speak(promptText());
   }
 
   function newRound() {
@@ -36,6 +40,10 @@
     replay.textContent = '🔊';
     replay.addEventListener('click', () => { if (!busy) playPrompt(); });
     bar.appendChild(replay);
+    const label = document.createElement('span');
+    label.className = 'prompt-text';
+    label.textContent = promptText();
+    bar.appendChild(label);
 
     const row = document.createElement('div');
     row.className = 'card-row fade-in';

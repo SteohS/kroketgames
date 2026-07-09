@@ -15,9 +15,13 @@
   let busy = false;
   let alive = false;
 
+  function promptText() {
+    return I18N.t('colorPrompt', { adj: ColorRegistry.adjOf(target) });
+  }
+
   async function playPrompt() {
     if (!alive) return;
-    await SoundKit.speak(I18N.t('colorPrompt', { adj: ColorRegistry.adjOf(target) }));
+    await SoundKit.speak(promptText());
   }
 
   function newRound() {
@@ -37,6 +41,10 @@
     replay.textContent = '🔊';
     replay.addEventListener('click', () => { if (!busy) playPrompt(); });
     bar.appendChild(replay);
+    const label = document.createElement('span');
+    label.className = 'prompt-text';
+    label.textContent = promptText();
+    bar.appendChild(label);
 
     const row = document.createElement('div');
     row.className = 'card-row fade-in';

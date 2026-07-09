@@ -14,9 +14,13 @@
   let busy = false;      // ignore taps during celebration/transition
   let alive = false;     // false once the game is stopped
 
+  function promptText() {
+    return I18N.t('whereIs', { name: AnimalRegistry.nameOf(target) });
+  }
+
   async function playPrompt() {
     if (!alive) return;
-    await SoundKit.speak(I18N.t('whereIs', { name: AnimalRegistry.nameOf(target) }));
+    await SoundKit.speak(promptText());
     if (!alive) return;
     await SoundKit.playAnimal(target.id);
   }
@@ -39,6 +43,10 @@
     replay.textContent = '🔊';
     replay.addEventListener('click', () => { if (!busy) playPrompt(); });
     bar.appendChild(replay);
+    const label = document.createElement('span');
+    label.className = 'prompt-text';
+    label.textContent = promptText();
+    bar.appendChild(label);
 
     // cards
     const row = document.createElement('div');

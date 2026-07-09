@@ -18,10 +18,14 @@
   let busy = false;         // ignore taps during celebration/transition
   let alive = false;        // false once the game is stopped
 
+  function promptText() {
+    const n = I18N.t('numbers.' + target);
+    return I18N.t('countPrompt', { n, name: CountRegistry.nameOf(object) });
+  }
+
   async function playPrompt() {
     if (!alive) return;
-    const n = I18N.t('numbers.' + target);
-    await SoundKit.speak(I18N.t('countPrompt', { n, name: CountRegistry.nameOf(object) }));
+    await SoundKit.speak(promptText());
   }
 
   function popItem(item) {
@@ -47,6 +51,10 @@
     replay.textContent = '🔊';
     replay.addEventListener('click', () => { if (!busy) playPrompt(); });
     bar.appendChild(replay);
+    const label = document.createElement('span');
+    label.className = 'prompt-text';
+    label.textContent = promptText();
+    bar.appendChild(label);
 
     // N identical objects to tap
     const stage = document.createElement('div');

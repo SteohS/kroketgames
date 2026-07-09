@@ -452,6 +452,15 @@ img { pointer-events: none; -webkit-user-drag: none; }
 }
 .replay-button:active { transform: scale(0.92); }
 
+/* the spoken question, shown as text beside the replay button (for the parent) */
+.prompt-text {
+  font-size: clamp(1.3rem, 4vw, 2.1rem);
+  font-weight: 800;
+  color: var(--ink);
+  line-height: 1.2;
+  text-align: left;
+}
+
 /* ---------- counting game ---------- */
 /* Up to 5 items wrap into a tidy grid. Items are sized off both viewport width
    and height (min(...,28vh)) so even 5 items never overflow the fixed screen. */
