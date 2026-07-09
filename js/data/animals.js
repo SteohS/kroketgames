@@ -13,7 +13,7 @@ const AnimalRegistry = (() => {
     { id: 'dog',     emoji: '🐶', tint: '#F2E4D8', name: { fr: 'le chien',   nl: 'de hond',   en: 'the dog' } },
     { id: 'cat',     emoji: '🐱', tint: '#EDE3EE', name: { fr: 'le chat',    nl: 'de kat',    en: 'the cat' } },
     { id: 'sheep',   emoji: '🐑', tint: '#E8EEE4', name: { fr: 'le mouton',  nl: 'het schaap', en: 'the sheep' } },
-    { id: 'chicken', emoji: '🐔', tint: '#F6EBD6', name: { fr: 'la poule',   nl: 'de kip',    en: 'the chicken' } },
+    { id: 'rooster', emoji: '🐓', tint: '#F6EBD6', name: { fr: 'le coq',     nl: 'de haan',   en: 'the rooster' } },
     { id: 'horse',   emoji: '🐴', tint: '#EFE1D4', name: { fr: 'le cheval',  nl: 'het paard', en: 'the horse' } },
     { id: 'pig',     emoji: '🐷', tint: '#F6E3E0', name: { fr: 'le cochon',  nl: 'het varken', en: 'the pig' } },
   ];

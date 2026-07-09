@@ -29,7 +29,7 @@ const I18N = (() => {
       // Spoken onomatopoeia fallback when no audio file exists for an animal
       animalSoundWords: {
         cow: 'Meuh, meuh !', duck: 'Coin coin !', dog: 'Ouaf ouaf !',
-        cat: 'Miaou !', sheep: 'Bêêê !', chicken: 'Cot cot cot !',
+        cat: 'Miaou !', sheep: 'Bêêê !', rooster: 'Cocorico !',
         horse: 'Hiii hiii !', pig: 'Groin groin !',
       },
     },
@@ -56,7 +56,7 @@ const I18N = (() => {
       praise: ['Goed zo!', 'Super!', 'Ja, juist!', 'Heel goed!'],
       animalSoundWords: {
         cow: 'Boe, boe!', duck: 'Kwak kwak!', dog: 'Woef woef!',
-        cat: 'Miauw!', sheep: 'Bèèè!', chicken: 'Tok tok tok!',
+        cat: 'Miauw!', sheep: 'Bèèè!', rooster: 'Kukeleku!',
         horse: 'Hinnik hinnik!', pig: 'Knor knor!',
       },
     },
@@ -83,7 +83,7 @@ const I18N = (() => {
       praise: ['Well done!', 'Great job!', 'Yes, that\u2019s it!', 'Wonderful!'],
       animalSoundWords: {
         cow: 'Moo, moo!', duck: 'Quack quack!', dog: 'Woof woof!',
-        cat: 'Meow!', sheep: 'Baa baa!', chicken: 'Cluck cluck!',
+        cat: 'Meow!', sheep: 'Baa baa!', rooster: 'Cock-a-doodle-doo!',
         horse: 'Neigh neigh!', pig: 'Oink oink!',
       },
     },

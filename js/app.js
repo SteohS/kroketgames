@@ -31,6 +31,11 @@ const App = (() => {
       detail: 'Free sound effects by Mixkit — no attribution required, credited here anyway.',
       url: 'https://mixkit.co/free-sound-effects/animals/',
     },
+    {
+      kind: 'Animal sounds',
+      detail: 'Jungle & farm animal sounds from Animal-Sounds.org.',
+      url: 'https://www.animal-sounds.org/jungle-animal-sounds.html',
+    },
   ];
 
   let currentGame = null;

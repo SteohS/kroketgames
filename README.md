@@ -65,6 +65,8 @@ Attribution for assets sourced from elsewhere. This list is mirrored in-app by t
 
 - **Animal sounds** — free sound effects by [Mixkit](https://mixkit.co/free-sound-effects/animals/).
   Mixkit's free license requires no attribution; credited here anyway.
+- **Animal sounds** — jungle & farm animal sounds from
+  [Animal-Sounds.org](https://www.animal-sounds.org/jungle-animal-sounds.html).
 
 When you add assets from a new source, add an entry both here and in the
 `ASSET_CREDITS` array in `js/app.js` (no other code changes needed).
