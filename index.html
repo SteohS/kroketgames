@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="theme-color" content="#FBF7EF" />
+  <meta name="theme-color" content="#9EC1DB" />
   <title>Mini Games</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -15,6 +15,20 @@
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
+
+  <!-- ============ ANIMATED SCENE (decorative, behind everything) ============ -->
+  <!-- Pure HTML/CSS: blue sky, a slowly shining sun, semitransparent clouds
+       drifting in and out of view, and soft rolling grass. pointer-events:none
+       so it never intercepts taps (menu buttons, long-press exit still work). -->
+  <div class="scene" aria-hidden="true">
+    <div class="sun"></div>
+    <div class="cloud cloud-1"></div>
+    <div class="cloud cloud-2"></div>
+    <div class="cloud cloud-3"></div>
+    <div class="cloud cloud-4"></div>
+    <div class="hill hill-back"></div>
+    <div class="hill hill-front"></div>
+  </div>
 
   <!-- ============ MENU SCREEN ============ -->
   <main id="menu-screen" class="screen">
