@@ -56,19 +56,28 @@ img { pointer-events: none; -webkit-user-drag: none; }
 .hidden { display: none !important; }
 
 /* ---------- menu ---------- */
-.menu-title {
-  font-weight: 800;
-  font-size: clamp(2rem, 6vw, 3rem);
-  letter-spacing: 0.02em;
-  margin: 0 0 28px;
+/* Menu lays out top-to-bottom: title, game grid, then the parent bar pinned
+   to the bottom via margin-top:auto (so it never overlaps the cards). */
+#menu-screen {
+  justify-content: flex-start;
 }
 
+.menu-title {
+  font-weight: 800;
+  font-size: clamp(1.8rem, 6vw, 3rem);
+  letter-spacing: 0.02em;
+  margin: 4px 0 clamp(16px, 4vh, 28px);
+}
+
+/* Responsive grid: always at least 2 columns on a phone, more on a tablet.
+   auto-fit keeps the cards a comfortable size without ever stacking 1-wide. */
 .game-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(clamp(130px, 40vw, 170px), 1fr));
+  gap: clamp(14px, 3vw, 24px);
   justify-content: center;
-  max-width: 720px;
+  width: 100%;
+  max-width: 640px;
 }
 
 .game-button {
@@ -77,7 +86,7 @@ img { pointer-events: none; -webkit-user-drag: none; }
   align-items: center;
   justify-content: center;
   gap: 10px;
-  width: min(42vw, 220px);
+  width: 100%;
   aspect-ratio: 1 / 1;
   border: none;
   border-radius: var(--radius);
@@ -109,21 +118,30 @@ img { pointer-events: none; -webkit-user-drag: none; }
 }
 
 /* ---------- parent bar ---------- */
+/* In normal flow, pushed to the bottom of the menu with margin-top:auto so it
+   never overlaps the game grid. Each label+select is a group that wraps as a
+   unit, so the dropdowns can't collide on a narrow screen. */
 .parent-bar {
-  position: absolute;
-  bottom: max(14px, env(safe-area-inset-bottom));
+  margin-top: auto;
+  padding-top: 16px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 8px 12px;
-  max-width: 92vw;
+  gap: 10px 20px;
+  max-width: 100%;
   opacity: 0.75;
+}
+.parent-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 .lang-label {
   font-size: 0.85rem;
   color: var(--ink-soft);
   font-weight: 600;
+  white-space: nowrap;
 }
 .lang-select {
   font-family: inherit;
@@ -186,12 +204,16 @@ img { pointer-events: none; -webkit-user-drag: none; }
 }
 
 /* ---------- animal cards (shared by games) ---------- */
+/* Cards stay on one row and shrink to share the available width (min-width:0)
+   rather than wrapping and overflowing the fixed, non-scrolling screen. */
 .card-row {
   display: flex;
-  gap: clamp(14px, 3vw, 32px);
+  gap: clamp(12px, 3vw, 32px);
   justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
+  align-items: stretch;
+  flex-wrap: nowrap;
+  width: 100%;
+  max-width: 760px;
 }
 
 .animal-card {
@@ -199,14 +221,17 @@ img { pointer-events: none; -webkit-user-drag: none; }
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: clamp(140px, 26vw, 230px);
+  flex: 1 1 0;
+  min-width: 0;
+  /* cap so cards don't get huge on a tablet or too tall in landscape */
+  max-width: min(230px, 62vh);
   aspect-ratio: 3 / 3.6;
   border: none;
   border-radius: var(--radius);
   background: var(--card);
   box-shadow: var(--shadow);
   cursor: pointer;
-  padding: 14px;
+  padding: clamp(8px, 1.5vw, 14px);
   transition: transform 0.15s ease;
 }
 .animal-card:active { transform: scale(0.96); }
@@ -250,12 +275,15 @@ img { pointer-events: none; -webkit-user-drag: none; }
 .replay-button:active { transform: scale(0.92); }
 
 /* ---------- counting game ---------- */
+/* Up to 5 items wrap into a tidy grid. Items are sized off both viewport width
+   and height (min(...,28vh)) so even 5 items never overflow the fixed screen. */
 .count-stage {
   display: flex;
   flex-wrap: wrap;
-  gap: clamp(12px, 3vw, 28px);
+  gap: clamp(10px, 2.5vw, 28px);
   justify-content: center;
   align-items: center;
+  width: 100%;
   max-width: 780px;
 }
 
@@ -264,7 +292,7 @@ img { pointer-events: none; -webkit-user-drag: none; }
   display: flex;
   align-items: center;
   justify-content: center;
-  width: clamp(96px, 20vw, 150px);
+  width: min(clamp(76px, 19vw, 150px), 28vh);
   aspect-ratio: 1 / 1;
   border: none;
   border-radius: var(--radius);
