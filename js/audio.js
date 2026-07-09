@@ -1,0 +1,129 @@
+/* ==========================================================================
+   SoundKit — all audio goes through here.
+   - speak(text): speech synthesis in the current language
+   - playAnimal(id): plays assets/audio/animals/<id>.mp3, falls back to
+     spoken onomatopoeia via TTS
+   - success()/nope(): UI sounds; plays assets/audio/ui/{success,nope}.mp3
+     if present, otherwise synthesizes a gentle tone with WebAudio
+   Call SoundKit.unlock() from the first user tap (iOS requirement).
+   ========================================================================== */
+
+const SoundKit = (() => {
+  let ctx = null;               // AudioContext, created on unlock
+  let voices = [];              // cached speechSynthesis voices
+  const fileCache = {};         // url -> HTMLAudioElement | 'missing'
+
+  // iOS loads voices asynchronously
+  function refreshVoices() { voices = speechSynthesis.getVoices(); }
+  if ('speechSynthesis' in window) {
+    refreshVoices();
+    speechSynthesis.onvoiceschanged = refreshVoices;
+  }
+
+  function pickVoice() {
+    const target = I18N.speechLang();           // e.g. 'fr-FR'
+    const prefix = target.slice(0, 2);
+    return (
+      voices.find(v => v.lang === target) ||
+      voices.find(v => v.lang.startsWith(prefix)) ||
+      null
+    );
+  }
+
+  function unlock() {
+    if (!ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) ctx = new AC();
+    }
+    if (ctx && ctx.state === 'suspended') ctx.resume();
+    // Warm up TTS on iOS with a silent utterance
+    if ('speechSynthesis' in window && !unlock.warmed) {
+      const u = new SpeechSynthesisUtterance('');
+      speechSynthesis.speak(u);
+      unlock.warmed = true;
+    }
+  }
+
+  function speak(text, { rate = 0.9 } = {}) {
+    return new Promise(resolve => {
+      if (!('speechSynthesis' in window)) return resolve();
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = I18N.speechLang();
+      const v = pickVoice();
+      if (v) u.voice = v;
+      u.rate = rate;            // slightly slow, toddler-friendly
+      u.onend = resolve;
+      u.onerror = resolve;
+      speechSynthesis.speak(u);
+    });
+  }
+
+  /** Try to play an audio file; resolve(true) if played, resolve(false) if missing. */
+  function playFile(url) {
+    return new Promise(resolve => {
+      if (fileCache[url] === 'missing') return resolve(false);
+      let el = fileCache[url];
+      if (!el) {
+        el = new window.Audio(url);
+        fileCache[url] = el;
+      }
+      el.currentTime = 0;
+      const onEnd = () => { cleanup(); resolve(true); };
+      const onErr = () => { cleanup(); fileCache[url] = 'missing'; resolve(false); };
+      function cleanup() {
+        el.removeEventListener('ended', onEnd);
+        el.removeEventListener('error', onErr);
+      }
+      el.addEventListener('ended', onEnd);
+      el.addEventListener('error', onErr);
+      el.play().catch(() => { onErr(); });
+    });
+  }
+
+  async function playAnimal(id) {
+    const played = await playFile(`assets/audio/animals/${id}.mp3`);
+    if (!played) {
+      await speak(I18N.t(`animalSoundWords.${id}`), { rate: 1 });
+    }
+  }
+
+  /* ---------- synthesized UI sounds (used when no file present) ---------- */
+
+  function tone(freq, start, dur, type = 'sine', gainPeak = 0.18) {
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = type;
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0, ctx.currentTime + start);
+    g.gain.linearRampToValueAtTime(gainPeak, ctx.currentTime + start + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
+    o.connect(g).connect(ctx.destination);
+    o.start(ctx.currentTime + start);
+    o.stop(ctx.currentTime + start + dur + 0.05);
+  }
+
+  async function success() {
+    if (await playFile('assets/audio/ui/success.mp3')) return;
+    if (!ctx) return;
+    // gentle rising major arpeggio
+    tone(523.25, 0.00, 0.25);   // C5
+    tone(659.25, 0.10, 0.25);   // E5
+    tone(783.99, 0.20, 0.35);   // G5
+  }
+
+  async function nope() {
+    if (await playFile('assets/audio/ui/nope.mp3')) return;
+    if (!ctx) return;
+    // soft, boring low thud — deliberately not funny
+    tone(180, 0, 0.18, 'triangle', 0.1);
+  }
+
+  async function pop() {
+    if (await playFile('assets/audio/ui/pop.mp3')) return;
+    if (!ctx) return;
+    tone(880, 0, 0.09, 'sine', 0.15);
+  }
+
+  return { unlock, speak, playAnimal, success, nope, pop };
+})();

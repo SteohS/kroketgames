@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <!-- user-scalable=no + touch-action in CSS: prevents toddler pinch/double-tap zoom -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="theme-color" content="#FBF7EF" />
+  <title>Mini Games</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- ============ MENU SCREEN ============ -->
+  <main id="menu-screen" class="screen">
+    <h1 id="menu-title" class="menu-title">Mini&nbsp;Games</h1>
+    <div id="game-list" class="game-list">
+      <!-- Game buttons injected by app.js from the Games registry -->
+    </div>
+
+    <!-- Parent corner: small, bottom of screen, deliberately un-shiny -->
+    <footer class="parent-bar">
+      <label class="lang-label" for="lang-select" id="lang-label">Voice</label>
+      <select id="lang-select" class="lang-select">
+        <option value="fr">Français</option>
+        <option value="nl">Nederlands</option>
+        <option value="en">English</option>
+      </select>
+    </footer>
+  </main>
+
+  <!-- ============ GAME SCREEN ============ -->
+  <section id="game-screen" class="screen hidden">
+    <!-- Invisible parent exit zone: long-press 3s, top-left corner -->
+    <div id="exit-zone" aria-hidden="true">
+      <svg id="exit-ring" viewBox="0 0 40 40">
+        <circle class="ring-bg" cx="20" cy="20" r="16"></circle>
+        <circle class="ring-fill" cx="20" cy="20" r="16"></circle>
+      </svg>
+    </div>
+    <div id="game-container"></div>
+  </section>
+
+  <!-- Confetti layer (shared) -->
+  <div id="confetti-layer" aria-hidden="true"></div>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/data/animals.js"></script>
+  <script src="js/data/shapes.js"></script>
+  <script src="js/app.js"></script>
+  <!-- Game registration order = menu order. Shapes first (fully procedural). -->
+  <script src="js/games/shapes.js"></script>
+  <script src="js/games/animal-sounds.js"></script>
+</body>
+</html>
