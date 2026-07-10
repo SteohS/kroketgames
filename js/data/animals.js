@@ -56,6 +56,16 @@ const AnimalRegistry = (() => {
   function nameOf(animal)   { return animal.name[I18N.lang]; }
   function pluralOf(animal) { return animal.plural[I18N.lang]; }
 
+  /** Uniform card for the find-it game: id, art, spoken prompt, name. */
+  function findCard(animal) {
+    return {
+      id: animal.id,
+      art: artFor(animal),
+      prompt: I18N.t('whereIs', { name: nameOf(animal) }),
+      name: nameOf(animal),
+    };
+  }
+
   /** Animals can have a sound: play the mp3 if present, else stay silent. */
   function playSound(animal) { return SoundKit.playSound('animals', animal.id); }
 
@@ -69,5 +79,5 @@ const AnimalRegistry = (() => {
     return out;
   }
 
-  return { id: 'animals', hasSound: true, all: ANIMALS, artFor, nameOf, pluralOf, pick, playSound };
+  return { id: 'animals', hasSound: true, all: ANIMALS, artFor, nameOf, pluralOf, pick, playSound, findCard };
 })();

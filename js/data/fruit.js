@@ -56,6 +56,16 @@ const FruitRegistry = (() => {
   function nameOf(fruit)   { return fruit.name[I18N.lang]; }
   function pluralOf(fruit) { return fruit.plural[I18N.lang]; }
 
+  /** Uniform card for the find-it game: id, art, spoken prompt, name. */
+  function findCard(fruit) {
+    return {
+      id: fruit.id,
+      art: artFor(fruit),
+      prompt: I18N.t('whereIs', { name: nameOf(fruit) }),
+      name: nameOf(fruit),
+    };
+  }
+
   /** Fruit have no sound — stay silent (resolved promise keeps callers happy). */
   function playSound() { return Promise.resolve(); }
 
@@ -69,5 +79,5 @@ const FruitRegistry = (() => {
     return out;
   }
 
-  return { id: 'fruit', hasSound: false, all: FRUIT, artFor, nameOf, pluralOf, pick, playSound };
+  return { id: 'fruit', hasSound: false, all: FRUIT, artFor, nameOf, pluralOf, pick, playSound, findCard };
 })();

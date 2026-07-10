@@ -36,6 +36,16 @@ const ColorRegistry = (() => {
   function nameOf(color) { return color.name[I18N.lang]; }
   function adjOf(color)  { return color.adj[I18N.lang]; }
 
+  /** Uniform card for the find-it game: the balloon + its color prompt. */
+  function findCard(color) {
+    return {
+      id: color.id,
+      art: artFor(color),
+      prompt: I18N.t('colorPrompt', { adj: adjOf(color) }),
+      name: nameOf(color),
+    };
+  }
+
   /** n distinct random colors. */
   function pick(n) {
     const pool = [...COLORS];
@@ -46,5 +56,5 @@ const ColorRegistry = (() => {
     return out;
   }
 
-  return { all: COLORS, artFor, nameOf, adjOf, pick };
+  return { all: COLORS, artFor, nameOf, adjOf, pick, findCard };
 })();
