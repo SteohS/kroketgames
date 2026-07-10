@@ -75,17 +75,61 @@ const App = (() => {
     localStorage.setItem('selectedGames', JSON.stringify([...selected]));
   }
 
+  /* ---------- content-category selection (config screen) ---------- */
+
+  // Which content categories (animals, fruit, shapes, colors) are enabled.
+  // Games run over one enabled *compatible* category per play. Persisted;
+  // default (first visit / bad data): all categories on.
+  function loadCategorySelection() {
+    const raw = localStorage.getItem('selectedCategories');
+    if (raw) {
+      try {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) return new Set(arr);
+      } catch { /* fall through to default */ }
+    }
+    return new Set(Content.all.map(c => c.id));
+  }
+  let selectedCategories = new Set();
+
+  function saveCategorySelection() {
+    localStorage.setItem('selectedCategories', JSON.stringify([...selectedCategories]));
+  }
+
+  // A game is eligible only if at least one category it can render is enabled.
+  function isEligible(gameId) {
+    return Content.categoriesForGame(gameId).some(c => selectedCategories.has(c.id));
+  }
+
+  // Ticked games that also have an enabled, compatible category.
+  function playableGames() {
+    return Games.all.filter(g => selected.has(g.id) && isEligible(g.id));
+  }
+
+  // Resolve one enabled category (its registry) for a game — random among the
+  // compatible enabled ones, so rolling legs can vary the category.
+  function pickCategoryFor(game) {
+    const cats = Content.categoriesForGame(game.id).filter(c => selectedCategories.has(c.id));
+    const cat = cats[Math.floor(Math.random() * cats.length)];
+    return cat ? cat.registry : null;
+  }
+
   /* ---------- config screen ---------- */
 
   // Builds the age-grouped, tickable game cards plus the labels around them.
   // Called on boot and whenever the language changes.
   function renderConfig() {
     $('#menu-title').textContent = I18N.t('menuTitle');
+    $('#choose-content').textContent = I18N.t('chooseContent');
     $('#choose-games').textContent = I18N.t('chooseGames');
     $('#lang-label').textContent = I18N.t('voiceLabel');
     $('#limit-label').textContent = I18N.t('limitLabel');
     $('#credits-btn').textContent = I18N.t('creditsLabel');
     $('#start-btn').textContent = I18N.t('startLabel');
+
+    const catList = $('#category-list');
+    catList.innerHTML = '';
+    Content.all.forEach(cat => catList.appendChild(makeCategoryToggle(cat)));
 
     const list = $('#game-list');
     list.innerHTML = '';
@@ -94,22 +138,63 @@ const App = (() => {
     bands.forEach(age => {
       const group = document.createElement('section');
       group.className = 'age-group';
-      const heading = document.createElement('h2');
-      heading.className = 'age-heading';
-      heading.textContent = I18N.t(`ageBands.${age}`);
       const grid = document.createElement('div');
       grid.className = 'game-grid';
       Games.all
         .filter(g => (g.age ?? 2) === age)
         .forEach(game => grid.appendChild(makeGameToggle(game)));
-      group.append(heading, grid);
+      // Only label the band when there's more than one — a lone band under the
+      // "Choose games" header would just be redundant clutter.
+      if (bands.length > 1) {
+        const heading = document.createElement('h2');
+        heading.className = 'age-heading';
+        heading.textContent = I18N.t(`ageBands.${age}`);
+        group.append(heading, grid);
+      } else {
+        group.appendChild(grid);
+      }
       list.appendChild(group);
     });
 
     updateStartState();
   }
 
+  // A single tickable category card. Toggling changes which games are eligible,
+  // so the whole config re-renders (cheap; keeps game greying in sync).
+  function makeCategoryToggle(cat) {
+    const idx = Content.all.indexOf(cat);
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'game-toggle';
+    btn.style.setProperty('--accent', ACCENTS[idx % ACCENTS.length]);
+
+    const check = document.createElement('span');
+    check.className = 'game-check';
+    check.textContent = '✓';
+    const icon = document.createElement('span');
+    icon.className = 'game-icon';
+    icon.textContent = cat.icon;
+    const label = document.createElement('span');
+    label.className = 'game-toggle-label';
+    label.textContent = I18N.t(`categories.${cat.id}`);
+    btn.append(icon, label, check);
+
+    const on = selectedCategories.has(cat.id);
+    btn.classList.toggle('selected', on);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+
+    btn.addEventListener('pointerdown', () => SoundKit.unlock(), { once: true });
+    btn.addEventListener('click', () => {
+      if (selectedCategories.has(cat.id)) selectedCategories.delete(cat.id);
+      else selectedCategories.add(cat.id);
+      saveCategorySelection();
+      renderConfig();
+    });
+    return btn;
+  }
+
   // A single tickable game card. Toggling it updates the persisted selection.
+  // Greyed + disabled when no enabled category can render it.
   function makeGameToggle(game) {
     const idx = Games.all.indexOf(game);
     const btn = document.createElement('button');
@@ -127,6 +212,9 @@ const App = (() => {
     label.className = 'game-toggle-label';
     label.textContent = I18N.t(`games.${game.id}`);
     btn.append(icon, label, check);
+
+    const eligible = isEligible(game.id);
+    btn.disabled = !eligible; // no enabled category can render it → un-tickable
 
     const sync = () => {
       const on = selected.has(game.id);
@@ -148,14 +236,14 @@ const App = (() => {
   }
 
   function updateStartState() {
-    $('#start-btn').disabled = selected.size === 0;
+    $('#start-btn').disabled = playableGames().length === 0;
   }
 
   /** Start playing the ticked games. One game → play it straight; several →
       rotate through them (shuffled) like the old surprise mode. */
   function startSelected() {
     SoundKit.unlock();
-    const chosen = Games.all.filter(g => selected.has(g.id));
+    const chosen = playableGames();
     if (chosen.length === 0) return;
     session.answered = 0;
     if (chosen.length === 1) playGame(chosen[0]);
@@ -176,13 +264,16 @@ const App = (() => {
     game.start(container, opts);
   }
 
-  /** Launch a single game from the menu, honoring the session limit if set. */
+  /** Launch a single game from the menu, honoring the session limit if set.
+      A compatible content category is resolved and injected via opts.category. */
   function playGame(game) {
     rolling = null;
     session.answered = 0;
-    openGame(game, session.limit
+    const opts = session.limit
       ? { rounds: session.limit, onCycleComplete: finishSession }
-      : {});
+      : {};
+    opts.category = pickCategoryFor(game);
+    openGame(game, opts);
   }
 
   function exitToMenu() {
@@ -247,6 +338,7 @@ const App = (() => {
     rolling.idx++;
     openGame(game, {
       rounds: legRounds,
+      category: pickCategoryFor(game), // new category each leg (single-category play)
       onCycleComplete: () => { session.answered += legRounds; rollNext(); },
     });
   }
@@ -361,6 +453,7 @@ const App = (() => {
 
   document.addEventListener('DOMContentLoaded', () => {
     selected = loadSelection();
+    selectedCategories = loadCategorySelection();
     renderConfig();
     setupSettings();
     setupExitZone();

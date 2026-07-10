@@ -10,26 +10,27 @@
   const kit = GameKit.session();
   let container = null;
   let opts = {};
+  let R = null;          // the content category (registry) — only sound-bearing ones
   let target = null;
   let correctCount = 0;
   let busy = false;      // ignore taps during celebration/transition
 
   function promptText() {
-    return I18N.t('whereIs', { name: AnimalRegistry.nameOf(target) });
+    return I18N.t('whereIs', { name: R.nameOf(target) });
   }
 
   async function playPrompt() {
     if (!kit.alive) return;
     await SoundKit.speak(promptText());
-    if (!kit.alive) return;
-    await SoundKit.playAnimal(target.id);
+    if (!kit.alive || !R.hasSound) return;
+    await R.playSound(target);
   }
 
   function newRound() {
     if (!kit.alive) return;
     busy = false;
 
-    const picked = AnimalRegistry.pick(CARD_COUNT);
+    const picked = R.pick(CARD_COUNT);
     target = picked[0];
     const shuffled = [...picked].sort(() => Math.random() - 0.5);
 
@@ -41,7 +42,7 @@
     shuffled.forEach(animal => {
       const card = document.createElement('button');
       card.className = 'animal-card';
-      card.appendChild(AnimalRegistry.artFor(animal));
+      card.appendChild(R.artFor(animal));
       card.addEventListener('click', () => onTap(card, animal, row));
       row.appendChild(card);
     });
@@ -69,7 +70,7 @@
     if (!kit.alive) return;
     await SoundKit.speak(I18N.praise());
     if (!kit.alive) return;
-    await SoundKit.playAnimal(target.id);
+    if (R.hasSound) await R.playSound(target);
     if (!kit.alive) return;
 
     row.classList.add('fade-out');
@@ -78,11 +79,12 @@
 
   Games.register({
     id: 'animal-sounds',
-    icon: '🐮',
+    icon: '👂',
     age: 2,
     start(el, o = {}) {
       container = el;
       opts = o;
+      R = o.category || AnimalRegistry; // only ever launched for sound-bearing categories
       correctCount = 0;
       kit.start();
       newRound();

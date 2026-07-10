@@ -1,8 +1,9 @@
 /* ==========================================================================
    Game: Discover the animals ("Découvre")
    A calm round of THREE animals with a spoken question at the top
-   ("Découvre les animaux !"). Tapping an animal plays its sound and then
-   speaks its name — pure exploration, no quiz, no wrong answers, no confetti.
+   ("Découvre les animaux !"). Tapping an animal speaks its name and then plays
+   its sound (if the category has one) — pure exploration, no quiz, no wrong
+   answers, no confetti. Works with any item category (animals, fruit, …).
    Once all three have been discovered a fresh trio slides in.
    A completed trio counts as ONE "answer" (discovering 3 animals is one round),
    so the game honors rolling mode and the session limit: after `opts.rounds`
@@ -15,12 +16,13 @@
   const kit = GameKit.session();
   let container = null;
   let opts = {};
+  let R = null;            // the content category (registry) for this session
   let roundCount = 0;      // completed trios this session (the "answer" count)
   let remaining = 0;       // animals not yet discovered in the current trio
   let busy = false;        // true while a transition is pending or the cap is hit
 
   function promptText() {
-    return I18N.t('discoverPrompt');
+    return I18N.t('discoverPrompt', { cat: R.id });
   }
 
   async function playPrompt() {
@@ -33,7 +35,7 @@
     busy = false;
     remaining = CARD_COUNT;
 
-    const picked = AnimalRegistry.pick(CARD_COUNT);
+    const picked = R.pick(CARD_COUNT);
 
     container.innerHTML = '';
     const bar = GameKit.promptBar(promptText(), () => { if (!busy) playPrompt(); });
@@ -43,7 +45,7 @@
     picked.forEach(animal => {
       const card = document.createElement('button');
       card.className = 'animal-card';
-      card.appendChild(AnimalRegistry.artFor(animal));
+      card.appendChild(R.artFor(animal));
       card.addEventListener('click', () => onTap(card, animal, row));
       row.appendChild(card);
     });
@@ -70,9 +72,10 @@
       if (remaining <= 0) { busy = true; trioDone = true; }
     }
 
-    await SoundKit.playAnimal(animal.id);
+    // Name first, then the sound (if this category has one — fruit stay silent).
+    await SoundKit.speak(R.nameOf(animal));
     if (!kit.alive) return;
-    await SoundKit.speak(AnimalRegistry.nameOf(animal));
+    await R.playSound(animal);
     if (!kit.alive) return;
 
     if (!trioDone) return;
@@ -95,6 +98,7 @@
     start(el, o = {}) {
       container = el;
       opts = o;
+      R = o.category || AnimalRegistry; // fallback keeps the game runnable standalone
       roundCount = 0;
       busy = false;
       kit.start();

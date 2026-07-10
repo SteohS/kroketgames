@@ -21,7 +21,7 @@
   <!-- ?v is bumped whenever css/*.css OR js/*.js changes, to bust Safari's
        aggressive cache. Keep the query in sync across the stylesheet and every
        <script> below (they share one version). -->
-  <link rel="stylesheet" href="css/styles.css?v=8" />
+  <link rel="stylesheet" href="css/styles.css?v=11" />
 </head>
 <body>
 
@@ -42,31 +42,45 @@
   <!-- ============ MENU SCREEN ============ -->
   <main id="menu-screen" class="screen">
     <h1 id="menu-title" class="menu-title">Mini&nbsp;Games</h1>
-    <p id="choose-games" class="config-subtitle">Choose games</p>
 
-    <!-- Age-grouped, tickable game cards injected by app.js from the registry -->
-    <div id="game-list" class="game-config"></div>
+    <!-- Config is a single panel of clearly-separated sections. -->
+    <div class="config-panel">
 
-    <!-- Parent options: language + session length, below the games -->
-    <div class="config-options">
-      <div class="parent-field">
-        <label class="lang-label" for="lang-select" id="lang-label">Voice</label>
-        <select id="lang-select" class="lang-select">
-          <option value="fr">Français</option>
-          <option value="nl">Nederlands</option>
-          <option value="en">English</option>
-        </select>
-      </div>
-      <div class="parent-field">
-        <label class="lang-label" for="limit-select" id="limit-label">Questions</label>
-        <select id="limit-select" class="lang-select">
-          <option value="">∞</option>
-          <option value="5">5</option>
-          <option value="10">10</option>
-          <option value="15">15</option>
-          <option value="20">20</option>
-        </select>
-      </div>
+      <!-- 1. Content categories (animals/fruit/shapes/colors): the first choice.
+           Tickable cards injected by app.js from the Content taxonomy. -->
+      <section class="config-section">
+        <h2 id="choose-content" class="config-subtitle">Choose a theme</h2>
+        <div id="category-list" class="game-grid"></div>
+      </section>
+
+      <!-- 2. Games: age-grouped tickable cards injected by app.js. -->
+      <section class="config-section">
+        <h2 id="choose-games" class="config-subtitle">Choose games</h2>
+        <div id="game-list" class="game-config"></div>
+      </section>
+
+      <!-- 3. Parent options: language + session length. -->
+      <section class="config-section config-options">
+        <div class="parent-field">
+          <label class="lang-label" for="lang-select" id="lang-label">Voice</label>
+          <select id="lang-select" class="lang-select">
+            <option value="fr">Français</option>
+            <option value="nl">Nederlands</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+        <div class="parent-field">
+          <label class="lang-label" for="limit-select" id="limit-label">Questions</label>
+          <select id="limit-select" class="lang-select">
+            <option value="">∞</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+          </select>
+        </div>
+      </section>
+
     </div>
 
     <!-- The one big deliberate action: start playing the ticked games -->
@@ -105,22 +119,24 @@
   <!-- Confetti layer (shared) -->
   <div id="confetti-layer" aria-hidden="true"></div>
 
-  <script src="js/i18n.js?v=8"></script>
-  <script src="js/audio.js?v=8"></script>
-  <script src="js/data/_registry.js?v=8"></script>
-  <script src="js/data/animals.js?v=8"></script>
-  <script src="js/data/shapes.js?v=8"></script>
-  <script src="js/data/countables.js?v=8"></script>
-  <script src="js/data/colors.js?v=8"></script>
-  <script src="js/app.js?v=8"></script>
+  <script src="js/i18n.js?v=11"></script>
+  <script src="js/audio.js?v=11"></script>
+  <script src="js/data/_registry.js?v=11"></script>
+  <script src="js/data/animals.js?v=11"></script>
+  <script src="js/data/fruit.js?v=11"></script>
+  <script src="js/data/shapes.js?v=11"></script>
+  <script src="js/data/colors.js?v=11"></script>
+  <!-- Content taxonomy: needs every registry above; used by app.js below. -->
+  <script src="js/data/_categories.js?v=11"></script>
+  <script src="js/app.js?v=11"></script>
   <!-- Shared game helpers; must load before any game registers. -->
-  <script src="js/games/_kit.js?v=8"></script>
+  <script src="js/games/_kit.js?v=11"></script>
   <!-- Game registration order = menu order. Shapes first (fully procedural). -->
-  <script src="js/games/shapes.js?v=8"></script>
-  <script src="js/games/animal-sounds.js?v=8"></script>
-  <script src="js/games/counting.js?v=8"></script>
-  <script src="js/games/free-play.js?v=8"></script>
-  <script src="js/games/color-hunt.js?v=8"></script>
-  <script src="js/games/peekaboo.js?v=8"></script>
+  <script src="js/games/shapes.js?v=11"></script>
+  <script src="js/games/animal-sounds.js?v=11"></script>
+  <script src="js/games/counting.js?v=11"></script>
+  <script src="js/games/free-play.js?v=11"></script>
+  <script src="js/games/color-hunt.js?v=11"></script>
+  <script src="js/games/peekaboo.js?v=11"></script>
 </body>
 </html>
