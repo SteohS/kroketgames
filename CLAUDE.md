@@ -43,8 +43,8 @@ js/data/_registry.js  RegistryKit: shared image-with-emoji-fallback .art builder
 js/data/_categories.js Content: category taxonomy (which games render which category)
 js/data/animals.js    item registry — Animals category (singular+plural names, sound)
 js/data/fruit.js      item registry — Fruit category (soundless)
-js/data/shapes.js     procedural Shapes registry (SVG; used only by the shapes game)
-js/data/colors.js     procedural Colors registry (SVG; used only by color-hunt)
+js/data/shapes.js     procedural Shapes registry (SVG; rendered by find-it)
+js/data/colors.js     procedural Colors registry (SVG balloons; rendered by find-it)
 js/games/_kit.js      GameKit: prompt bar, wiggle, palette, per-game lifecycle (session)
 js/games/*.js         one file per mini-game, registered via Games.register(...)
 assets/images/<cat>/  illustrations per category (see naming conventions in each README)
@@ -66,12 +66,15 @@ assets/audio/<cat>/   per-category sounds + ui/ sounds (optional overrides for s
    `GameKit.wiggle(card)`, `GameKit.PALETTE`, and `const kit = GameKit.session()` whose
    `kit.stop()` clears the pending timer **and** calls `SoundKit.stop()` (so audio goes
    silent immediately — call it from your game's `stop()`). See any game file for the shape.
-4. **Be category-agnostic** (item games): read the injected registry as
-   `const R = opts.category` and drive the round through its interface (`R.pick(n)`,
-   `R.artFor(item)`, `R.nameOf`, `R.pluralOf`, `R.hasSound`, `R.playSound(item)`) rather
-   than a hardcoded global. List the game under each category it supports in
-   `js/data/_categories.js`. Games tied to procedural content (shapes/colors) stay 1:1
-   with their own registry. See the "Content categories" section.
+4. **Be category-agnostic**: read the injected registry as `const R = opts.category` and
+   drive the round through its interface (`R.pick(n)`, `R.artFor(item)`, `R.nameOf`,
+   `R.pluralOf`, `R.hasSound`, `R.playSound(item)`, `R.findCard(item)`) rather than a
+   hardcoded global. List the game under each category it supports in
+   `js/data/_categories.js`. `find-it` shows the widest reach: because **every** registry
+   (item **and** procedural) exposes the uniform `findCard` facade, one game can span all
+   four categories with no branching. A game that instead needs a registry's raw structure
+   (e.g. a future shape-sorter consuming `pick`'s `{shape,color}` pairs directly) can stay
+   1:1 with that registry. See the "Content categories" section.
 5. **Support rolling mode**: `opts` may contain `{ rounds, onCycleComplete, category }`.
    After `rounds` correct answers, call `opts.onCycleComplete()` instead of starting a new
    round (see shapes.js for the pattern). `stop()` must silence the game immediately.
@@ -82,19 +85,29 @@ assets/audio/<cat>/   per-category sounds + ui/ sounds (optional overrides for s
 Each descriptor is `{ id, icon, registry, games:[...] }`; `Content.categoriesForGame(id)`
 is the reverse lookup. The four categories today:
 
-- **Animals** (`AnimalRegistry`, has sound) → counting, free-play, peekaboo, animal-sounds
-- **Fruit** (`FruitRegistry`, soundless) → counting, free-play, peekaboo
-- **Shapes** (`ShapeRegistry`, procedural) → shapes
-- **Colors** (`ColorRegistry`, procedural) → color-hunt
+- **Animals** (`AnimalRegistry`, has sound) → find-it, counting, free-play, peekaboo, animal-sounds
+- **Fruit** (`FruitRegistry`, soundless) → find-it, counting, free-play, peekaboo
+- **Shapes** (`ShapeRegistry`, procedural) → find-it
+- **Colors** (`ColorRegistry`, procedural) → find-it
 
 **Item registries** (Animals, Fruit) share one interface: `id, hasSound, all, pick(n),
 artFor(item), nameOf(item)` (singular w/ article), `pluralOf(item)` (article-free plural,
-for counting), `playSound(item)` (Promise; no-op for soundless categories). The app injects
-the chosen registry as `opts.category`; `app.js`'s `pickCategoryFor(game)` resolves one
-enabled, compatible category per play (and per rolling leg, so legs can vary the category).
-The sound-quiz (`animal-sounds`) is listed only under Animals, so soundless categories never
-include it. Any category-named prompt (e.g. `discoverPrompt`) must key off the category
-(`I18N.t('discoverPrompt', { cat: R.id })`) — never hardcode "animals".
+for counting), `playSound(item)` (Promise; no-op for soundless categories), and
+`findCard(item)` (see below). The app injects the chosen registry as `opts.category`;
+`app.js`'s `pickCategoryFor(game)` resolves one enabled, compatible category per play (and
+per rolling leg, so legs can vary the category). The sound-quiz (`animal-sounds`) is listed
+only under Animals, so soundless categories never include it. Any category-named prompt
+(e.g. `discoverPrompt`) must key off the category (`I18N.t('discoverPrompt', { cat: R.id })`)
+— never hardcode "animals".
+
+**Find-it card facade**: the category-agnostic `find-it` game runs over *all four*
+categories, so **every** registry (item **and** procedural — shapes/colors) also exposes
+`findCard(raw)` → `{ id, art, prompt, name }`: `raw` is one element from that registry's
+`pick(n)` ( `{shape,color}` for shapes, a plain item elsewhere), `art` is the `.art`
+element, `prompt` is the fully-resolved spoken question (each registry chooses its own form
+— `whereIs` for shapes/animals/fruit, `colorPrompt` for colors), and `name` is what the game
+speaks to reinforce a correct tap. This lets `js/games/find-it.js` stay fully generic
+(`R.pick(n).map(R.findCard)`) with no per-category branching.
 
 **Adding a category**: create `js/data/<id>.js` (item interface above), add one descriptor
 line in `js/data/_categories.js`, add its `<script>` before `_categories.js` in `index.html`,
@@ -136,31 +149,39 @@ registry) falls back to a big emoji when the PNG is missing; `SoundKit.playSound
 id)` plays **nothing** when the mp3 is missing (no TTS substitute). Dropping real files into
 `assets/` upgrades the experience with no code change.
 
-## Game backlog (build in roughly this order)
+## Game backlog
 
-1. ✅ **Shapes** (`shapes`) — "where is the circle?", 3 procedural SVG shape cards.
-   Fully asset-free — this is the flagship game while art is being produced.
-2. ✅ **Sounds** (`animal-sounds`, titled "Sounds") — hear an animal sound, tap the right
-   card ("Où est la vache ?" + the mp3). Animals only (the sound is the clue); an animal
-   with no mp3 just relies on the spoken prompt. Emoji fallback for missing art.
-3. ✅ **Counting taps** (`counting`) — "tap three apples!", voice counts along each
-   tap, celebrate when all are counted. Runs on any item category (animals/fruit); uses
+The five shipped games (menu order = registration order in `index.html`):
+
+1. ✅ **Find it** (`find-it`) — the category-agnostic "where is it?" game: a spoken
+   prompt names one item ("Où est le rond ?", "Trouve le ballon rouge !", "Où est la
+   vache ?") over 3 cards; right = celebrate + reinforce the name, wrong = gentle wiggle.
+   Runs over shapes/colors/animals/fruit via each registry's `findCard` facade. Fully
+   asset-free for shapes/colors (procedural SVG); emoji fallback for animals/fruit.
+   (Merged the former separate `shapes` and `color-hunt` games — see "Find-it card facade".)
+2. ✅ **Sounds** (`animal-sounds`, titled "Which sound? / Quel bruit ?") — a sound plays
+   plus a sound-first prompt that does **not** name the animal ("Qui fait ce bruit ?");
+   tap the right card, which then celebrates and speaks the animal's name so the child
+   hears what made the noise. Animals only (the sound is the clue); an animal with no mp3
+   just relies on the spoken prompt. Emoji fallback for missing art.
+3. ✅ **Counting** (`counting`) — "tap three apples!", voice counts along each tap,
+   celebrate when all are counted. Runs on any item category (animals/fruit); uses
    `R.pluralOf`. Asset-free via emoji; upgrade by dropping files in the category's dir.
-4. ✅ **Discover** (`free-play`) — a category-aware spoken question ("Discover the
+4. ✅ **Discover 3** (`free-play`) — a category-aware spoken question ("Discover the
    animals!" / "Découvre les fruits !") over a trio of 3 items; tapping any speaks its
    name then plays its sound (if the category has one). No quiz, no fail states. Once all
    3 are discovered a fresh trio fades in. Each completed trio counts as one "answer" so
    rolling mode and the session limit work unchanged.
-5. ✅ **Color hunt** (`color-hunt`) — "find the red balloon!", 3 differently-
-   colored balloons; right = celebrate + speak the color name to reinforce it,
-   wrong = gentle wiggle. Fully procedural SVG (6 colors), zero assets.
-6. ✅ **Peekaboo** (`peekaboo`) — one item (animal/fruit/…) hides behind a soft pastel
+5. ✅ **Peekaboo** (`peekaboo`) — one item (animal/fruit/…) hides behind a soft pastel
    blanket; tapping lifts it, bounces it, speaks its name then plays its sound (if any).
    No wrong answer (each reveal = one "answer"). Asset-free via emoji.
-7. **Pop the bubbles** — floating bubbles with animals/numbers inside.
-8. **Feed the animal** — tap the right food for the hungry animal.
-9. **Shape sorter** — tap-based (not drag), match shape to hole; reuse ShapeRegistry.
-10. Later/more complex: simple piano, memory pairs, puzzles.
+
+Ideas not yet built (roughly in order):
+
+6. **Pop the bubbles** — floating bubbles with animals/numbers inside.
+7. **Feed the animal** — tap the right food for the hungry animal.
+8. **Shape sorter** — tap-based (not drag), match shape to hole; reuse ShapeRegistry.
+9. Later/more complex: simple piano, memory pairs, puzzles.
 
 ## Art & asset generation
 

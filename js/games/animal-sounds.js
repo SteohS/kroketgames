@@ -1,8 +1,10 @@
 /* ==========================================================================
-   Game: Animal Sounds
-   A sound plays + a spoken prompt ("Où est la vache ?").
-   Three cards appear; tapping the right one celebrates, a wrong one
-   wiggles gently (boring on purpose). Big replay button repeats the prompt.
+   Game: Sounds ("Who makes this noise?")
+   A sound plays + a sound-first spoken prompt ("Qui fait ce bruit ?") that
+   deliberately does NOT name the animal — the sound is the whole clue. Three
+   cards appear; the right one celebrates and speaks the animal's name (so the
+   child hears what made the noise), a wrong one wiggles gently (boring on
+   purpose). Big replay button repeats the prompt + sound.
    ========================================================================== */
 
 (() => {
@@ -16,7 +18,7 @@
   let busy = false;      // ignore taps during celebration/transition
 
   function promptText() {
-    return I18N.t('whereIs', { name: R.nameOf(target) });
+    return I18N.t('soundPrompt');
   }
 
   async function playPrompt() {
@@ -67,6 +69,8 @@
     card.classList.add('bounce');
     App.confetti();
     await SoundKit.success();
+    if (!kit.alive) return;
+    await SoundKit.speak(R.nameOf(target)); // name what made the noise
     if (!kit.alive) return;
     await SoundKit.speak(I18N.praise());
     if (!kit.alive) return;

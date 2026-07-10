@@ -54,6 +54,16 @@ const ShapeRegistry = (() => {
 
   function nameOf(shape) { return shape.name[I18N.lang]; }
 
+  /** Uniform card for the find-it game. `raw` is a {shape,color} from pick(). */
+  function findCard({ shape, color }) {
+    return {
+      id: shape.id,
+      art: artFor(shape, color),
+      prompt: I18N.t('whereIs', { name: nameOf(shape) }),
+      name: nameOf(shape),
+    };
+  }
+
   /** n distinct random shapes, each paired with a distinct color. */
   function pick(n) {
     const pool = [...SHAPES];
@@ -66,5 +76,5 @@ const ShapeRegistry = (() => {
     return out;
   }
 
-  return { all: SHAPES, artFor, nameOf, pick };
+  return { all: SHAPES, artFor, nameOf, pick, findCard };
 })();

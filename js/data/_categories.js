@@ -13,13 +13,13 @@
 const Content = (() => {
   const CATEGORIES = [
     { id: 'animals', icon: '🐮', registry: AnimalRegistry,
-      games: ['counting', 'free-play', 'peekaboo', 'animal-sounds'] },
+      games: ['find-it', 'counting', 'free-play', 'peekaboo', 'animal-sounds'] },
     { id: 'fruit',   icon: '🍓', registry: FruitRegistry,
-      games: ['counting', 'free-play', 'peekaboo'] },
+      games: ['find-it', 'counting', 'free-play', 'peekaboo'] },
     { id: 'shapes',  icon: '🔷', registry: ShapeRegistry,
-      games: ['shapes'] },
+      games: ['find-it'] },
     { id: 'colors',  icon: '🎨', registry: ColorRegistry,
-      games: ['color-hunt'] },
+      games: ['find-it'] },
   ];
 
   function get(id) { return CATEGORIES.find(c => c.id === id) || null; }

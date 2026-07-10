@@ -21,7 +21,7 @@
   <!-- ?v is bumped whenever css/*.css OR js/*.js changes, to bust Safari's
        aggressive cache. Keep the query in sync across the stylesheet and every
        <script> below (they share one version). -->
-  <link rel="stylesheet" href="css/styles.css?v=11" />
+  <link rel="stylesheet" href="css/styles.css?v=12" />
 </head>
 <body>
 
@@ -119,24 +119,23 @@
   <!-- Confetti layer (shared) -->
   <div id="confetti-layer" aria-hidden="true"></div>
 
-  <script src="js/i18n.js?v=11"></script>
-  <script src="js/audio.js?v=11"></script>
-  <script src="js/data/_registry.js?v=11"></script>
-  <script src="js/data/animals.js?v=11"></script>
-  <script src="js/data/fruit.js?v=11"></script>
-  <script src="js/data/shapes.js?v=11"></script>
-  <script src="js/data/colors.js?v=11"></script>
+  <script src="js/i18n.js?v=12"></script>
+  <script src="js/audio.js?v=12"></script>
+  <script src="js/data/_registry.js?v=12"></script>
+  <script src="js/data/animals.js?v=12"></script>
+  <script src="js/data/fruit.js?v=12"></script>
+  <script src="js/data/shapes.js?v=12"></script>
+  <script src="js/data/colors.js?v=12"></script>
   <!-- Content taxonomy: needs every registry above; used by app.js below. -->
-  <script src="js/data/_categories.js?v=11"></script>
-  <script src="js/app.js?v=11"></script>
+  <script src="js/data/_categories.js?v=12"></script>
+  <script src="js/app.js?v=12"></script>
   <!-- Shared game helpers; must load before any game registers. -->
-  <script src="js/games/_kit.js?v=11"></script>
-  <!-- Game registration order = menu order. Shapes first (fully procedural). -->
-  <script src="js/games/shapes.js?v=11"></script>
-  <script src="js/games/animal-sounds.js?v=11"></script>
-  <script src="js/games/counting.js?v=11"></script>
-  <script src="js/games/free-play.js?v=11"></script>
-  <script src="js/games/color-hunt.js?v=11"></script>
-  <script src="js/games/peekaboo.js?v=11"></script>
+  <script src="js/games/_kit.js?v=12"></script>
+  <!-- Game registration order = menu order. Find-it first (category-agnostic). -->
+  <script src="js/games/find-it.js?v=12"></script>
+  <script src="js/games/animal-sounds.js?v=12"></script>
+  <script src="js/games/counting.js?v=12"></script>
+  <script src="js/games/free-play.js?v=12"></script>
+  <script src="js/games/peekaboo.js?v=12"></script>
 </body>
 </html>
