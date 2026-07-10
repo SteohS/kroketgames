@@ -7,6 +7,8 @@ const I18N = (() => {
   const STRINGS = {
     fr: {
       menuTitle: 'Petits jeux',
+      chooseContent: 'Choisis le thème',
+      categories: { animals: 'Les animaux', fruit: 'Les fruits', shapes: 'Les formes', colors: 'Les couleurs' },
       chooseGames: 'Choisis les jeux',
       startLabel: 'Jouer',
       ageBands: { 2: 'Dès 2 ans', 3: 'Dès 3 ans', 4: 'Dès 4 ans' },
@@ -18,7 +20,7 @@ const I18N = (() => {
       allDone: 'C’est fini ! Bravo !',
       games: {
         'shapes': 'Les formes',
-        'animal-sounds': 'Les animaux',
+        'animal-sounds': 'Les sons',
         'counting': 'Compter',
         'free-play': 'Découvre',
         'color-hunt': 'Les couleurs',
@@ -27,19 +29,15 @@ const I18N = (() => {
       whereIs: ({ name }) => `Où est ${name} ?`,
       countPrompt: ({ n, name }) => `Touche ${n} ${name} !`,
       colorPrompt: ({ adj }) => `Trouve le ballon ${adj} !`,
-      discoverPrompt: 'Découvre les animaux !',
+      discoverPrompt: ({ cat }) => ({ animals: 'Découvre les animaux !', fruit: 'Découvre les fruits !' }[cat] || 'Regarde bien !'),
       peekPrompt: 'Qui se cache ? Touche pour voir !',
       numbers: { 1: 'un', 2: 'deux', 3: 'trois', 4: 'quatre', 5: 'cinq' },
       praise: ['Bravo !', 'Super !', 'Oui, c\u2019est ça !', 'Très bien !'],
-      // Spoken onomatopoeia fallback when no audio file exists for an animal
-      animalSoundWords: {
-        cow: 'Meuh, meuh !', duck: 'Coin coin !', dog: 'Ouaf ouaf !',
-        cat: 'Miaou !', sheep: 'Bêêê !', rooster: 'Cocorico !',
-        horse: 'Hiii hiii !', pig: 'Groin groin !',
-      },
     },
     nl: {
       menuTitle: 'Spelletjes',
+      chooseContent: 'Kies het thema',
+      categories: { animals: 'De dieren', fruit: 'Het fruit', shapes: 'De vormen', colors: 'De kleuren' },
       chooseGames: 'Kies de spelletjes',
       startLabel: 'Spelen',
       ageBands: { 2: 'Vanaf 2 jaar', 3: 'Vanaf 3 jaar', 4: 'Vanaf 4 jaar' },
@@ -51,7 +49,7 @@ const I18N = (() => {
       allDone: 'Klaar! Goed gedaan!',
       games: {
         'shapes': 'De vormen',
-        'animal-sounds': 'De dieren',
+        'animal-sounds': 'De geluiden',
         'counting': 'Tellen',
         'free-play': 'Ontdek',
         'color-hunt': 'De kleuren',
@@ -60,18 +58,15 @@ const I18N = (() => {
       whereIs: ({ name }) => `Waar is ${name}?`,
       countPrompt: ({ n, name }) => `Tik op ${n} ${name}!`,
       colorPrompt: ({ adj }) => `Vind de ${adj} ballon!`,
-      discoverPrompt: 'Ontdek de dieren!',
+      discoverPrompt: ({ cat }) => ({ animals: 'Ontdek de dieren!', fruit: 'Ontdek het fruit!' }[cat] || 'Kijk goed!'),
       peekPrompt: 'Wie verstopt zich? Tik om te kijken!',
       numbers: { 1: 'één', 2: 'twee', 3: 'drie', 4: 'vier', 5: 'vijf' },
       praise: ['Goed zo!', 'Super!', 'Ja, juist!', 'Heel goed!'],
-      animalSoundWords: {
-        cow: 'Boe, boe!', duck: 'Kwak kwak!', dog: 'Woef woef!',
-        cat: 'Miauw!', sheep: 'Bèèè!', rooster: 'Kukeleku!',
-        horse: 'Hinnik hinnik!', pig: 'Knor knor!',
-      },
     },
     en: {
       menuTitle: 'Mini Games',
+      chooseContent: 'Choose a theme',
+      categories: { animals: 'Animals', fruit: 'Fruit', shapes: 'Shapes', colors: 'Colors' },
       chooseGames: 'Choose games',
       startLabel: 'Play',
       ageBands: { 2: 'Age 2+', 3: 'Age 3+', 4: 'Age 4+' },
@@ -83,7 +78,7 @@ const I18N = (() => {
       allDone: 'All done! Well done!',
       games: {
         'shapes': 'Shapes',
-        'animal-sounds': 'Animals',
+        'animal-sounds': 'Sounds',
         'counting': 'Counting',
         'free-play': 'Discover',
         'color-hunt': 'Colors',
@@ -92,15 +87,10 @@ const I18N = (() => {
       whereIs: ({ name }) => `Where is ${name}?`,
       countPrompt: ({ n, name }) => `Tap ${n} ${name}!`,
       colorPrompt: ({ adj }) => `Find the ${adj} balloon!`,
-      discoverPrompt: 'Discover the animals!',
+      discoverPrompt: ({ cat }) => ({ animals: 'Discover the animals!', fruit: 'Discover the fruit!' }[cat] || 'Take a look!'),
       peekPrompt: 'Who’s hiding? Tap to see!',
       numbers: { 1: 'one', 2: 'two', 3: 'three', 4: 'four', 5: 'five' },
       praise: ['Well done!', 'Great job!', 'Yes, that\u2019s it!', 'Wonderful!'],
-      animalSoundWords: {
-        cow: 'Moo, moo!', duck: 'Quack quack!', dog: 'Woof woof!',
-        cat: 'Meow!', sheep: 'Baa baa!', rooster: 'Cock-a-doodle-doo!',
-        horse: 'Neigh neigh!', pig: 'Oink oink!',
-      },
     },
   };
 

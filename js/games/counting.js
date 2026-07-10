@@ -12,6 +12,7 @@
   const kit = GameKit.session();
   let container = null;
   let opts = {};
+  let R = null;             // the content category (registry) for this session
   let object = null;        // the countable used this round
   let target = 0;           // how many to count
   let counted = 0;          // how many tapped so far
@@ -20,7 +21,7 @@
 
   function promptText() {
     const n = I18N.t('numbers.' + target);
-    return I18N.t('countPrompt', { n, name: CountRegistry.nameOf(object) });
+    return I18N.t('countPrompt', { n, name: R.pluralOf(object) });
   }
 
   async function playPrompt() {
@@ -33,7 +34,7 @@
     busy = false;
     counted = 0;
     target = MIN + Math.floor(Math.random() * (MAX - MIN + 1));
-    object = CountRegistry.pick();
+    object = R.pick(1)[0];
 
     container.innerHTML = '';
     const bar = GameKit.promptBar(promptText(), () => { if (!busy) playPrompt(); });
@@ -44,7 +45,7 @@
     for (let i = 0; i < target; i++) {
       const item = document.createElement('button');
       item.className = 'count-item';
-      item.appendChild(CountRegistry.artFor(object));
+      item.appendChild(R.artFor(object));
       item.addEventListener('click', () => onTap(item, stage));
       stage.appendChild(item);
     }
@@ -92,6 +93,7 @@
     start(el, o = {}) {
       container = el;
       opts = o;
+      R = o.category || AnimalRegistry; // fallback keeps the game runnable standalone
       correctCount = 0;
       kit.start();
       newRound();

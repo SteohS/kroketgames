@@ -1,7 +1,7 @@
 /* ==========================================================================
-   RegistryKit — shared helpers for the content registries (animals, objects…).
-   Currently just the image-with-emoji-fallback `.art` builder that AnimalRegistry
-   and CountRegistry used to duplicate verbatim.
+   RegistryKit — shared helpers for the content registries (animals, fruit…).
+   Currently just the image-with-emoji-fallback `.art` builder that the item
+   registries (AnimalRegistry, FruitRegistry) share.
    ========================================================================== */
 
 const RegistryKit = (() => {

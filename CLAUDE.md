@@ -21,9 +21,15 @@ hosted on GitHub Pages, used on iPad & iPhone (Safari).
 - **Real illustrations, not emoji**: emoji are only a *fallback* while image assets are
   missing (see asset conventions below). Parent will source CC0 art (e.g. Kenney.nl).
 - **No offline / service worker for now.** PWA manifest yes (fullscreen on home screen).
+- **Content categories**: games are content-agnostic. A **category** (Animals, Fruit,
+  Shapes, Colors) supplies the items; the parent picks categories first on the config
+  screen, and each game runs over a single compatible category per play. See the
+  "Content categories" section below.
+- **Sound is optional per item**: a missing `assets/audio/<category>/<id>.mp3` simply plays
+  **no sound** — there is no spoken-onomatopoeia substitute. Fruit is a soundless category.
 - **Stack**: plain HTML + CSS + vanilla JS. Each concern is a global-script IIFE
-  (`Games`, `App`, `SoundKit`, `I18N`, the registries, `GameKit`, `RegistryKit`) —
-  not ES modules. No frameworks, no bundler.
+  (`Games`, `App`, `SoundKit`, `I18N`, the registries, `Content`, `GameKit`, `RegistryKit`)
+  — not ES modules. No frameworks, no bundler.
 
 ## Architecture
 
@@ -34,11 +40,15 @@ js/app.js             config screen, game selection, navigation, settings, long-
 js/audio.js           SoundKit: TTS wrapper + WebAudio synth dings + file playback + stop()
 js/i18n.js            all user-facing strings & praise phrases (fr/nl/en)
 js/data/_registry.js  RegistryKit: shared image-with-emoji-fallback .art builder
-js/data/animals.js    shared animal registry (names per language, asset paths, emoji fallback)
+js/data/_categories.js Content: category taxonomy (which games render which category)
+js/data/animals.js    item registry — Animals category (singular+plural names, sound)
+js/data/fruit.js      item registry — Fruit category (soundless)
+js/data/shapes.js     procedural Shapes registry (SVG; used only by the shapes game)
+js/data/colors.js     procedural Colors registry (SVG; used only by color-hunt)
 js/games/_kit.js      GameKit: prompt bar, wiggle, palette, per-game lifecycle (session)
 js/games/*.js         one file per mini-game, registered via Games.register(...)
-assets/images/...     illustrations (see naming conventions in each folder's README)
-assets/audio/...      animal sounds + UI sounds (optional overrides for synth sounds)
+assets/images/<cat>/  illustrations per category (see naming conventions in each README)
+assets/audio/<cat>/   per-category sounds + ui/ sounds (optional overrides for synth)
 ```
 
 ### Adding a new game
@@ -56,22 +66,57 @@ assets/audio/...      animal sounds + UI sounds (optional overrides for synth so
    `GameKit.wiggle(card)`, `GameKit.PALETTE`, and `const kit = GameKit.session()` whose
    `kit.stop()` clears the pending timer **and** calls `SoundKit.stop()` (so audio goes
    silent immediately — call it from your game's `stop()`). See any game file for the shape.
-4. **Support rolling mode**: `opts` may contain `{ rounds, onCycleComplete }`. After
-   `rounds` correct answers, call `opts.onCycleComplete()` instead of starting a new
+4. **Be category-agnostic** (item games): read the injected registry as
+   `const R = opts.category` and drive the round through its interface (`R.pick(n)`,
+   `R.artFor(item)`, `R.nameOf`, `R.pluralOf`, `R.hasSound`, `R.playSound(item)`) rather
+   than a hardcoded global. List the game under each category it supports in
+   `js/data/_categories.js`. Games tied to procedural content (shapes/colors) stay 1:1
+   with their own registry. See the "Content categories" section.
+5. **Support rolling mode**: `opts` may contain `{ rounds, onCycleComplete, category }`.
+   After `rounds` correct answers, call `opts.onCycleComplete()` instead of starting a new
    round (see shapes.js for the pattern). `stop()` must silence the game immediately.
+
+### Content categories
+
+`js/data/_categories.js` defines `Content` — the taxonomy the config picker is built from.
+Each descriptor is `{ id, icon, registry, games:[...] }`; `Content.categoriesForGame(id)`
+is the reverse lookup. The four categories today:
+
+- **Animals** (`AnimalRegistry`, has sound) → counting, free-play, peekaboo, animal-sounds
+- **Fruit** (`FruitRegistry`, soundless) → counting, free-play, peekaboo
+- **Shapes** (`ShapeRegistry`, procedural) → shapes
+- **Colors** (`ColorRegistry`, procedural) → color-hunt
+
+**Item registries** (Animals, Fruit) share one interface: `id, hasSound, all, pick(n),
+artFor(item), nameOf(item)` (singular w/ article), `pluralOf(item)` (article-free plural,
+for counting), `playSound(item)` (Promise; no-op for soundless categories). The app injects
+the chosen registry as `opts.category`; `app.js`'s `pickCategoryFor(game)` resolves one
+enabled, compatible category per play (and per rolling leg, so legs can vary the category).
+The sound-quiz (`animal-sounds`) is listed only under Animals, so soundless categories never
+include it. Any category-named prompt (e.g. `discoverPrompt`) must key off the category
+(`I18N.t('discoverPrompt', { cat: R.id })`) — never hardcode "animals".
+
+**Adding a category**: create `js/data/<id>.js` (item interface above), add one descriptor
+line in `js/data/_categories.js`, add its `<script>` before `_categories.js` in `index.html`,
+add `categories.<id>` label to `i18n.js`, and (optionally) drop art/sound under
+`assets/{images,audio}/<id>/`. No game changes needed.
 
 ### Config screen (home) & rolling mode
 
-The home screen is a parent-facing **configuration** page (`renderConfig` in app.js):
-games are shown as tickable cards grouped by age band (`ageBands` labels), plus the
-voice + questions options and a **Start** button. The ticked set is persisted as
-`selectedGames` (defaults to all on first visit). Start:
-- **one game ticked** → plays it straight (`playGame`);
-- **several ticked** → shuffles them and rotates, `ROLLING_ROUNDS` (3) correct
+The home screen is a parent-facing **configuration** page (`renderConfig` in app.js).
+The **first** choice is a row of tickable **content-category** cards (persisted as
+`selectedCategories`, default all); below it the tickable **game** cards grouped by age band
+(`ageBands` labels), persisted as `selectedGames`; then the voice + questions options and a
+**Start** button. A game card is greyed/disabled when no enabled category can render it
+(`isEligible`); only *playable* games (ticked **and** with an enabled compatible category)
+count. Start:
+- **one playable game** → plays it straight (`playGame`);
+- **several** → shuffles them and rotates, `ROLLING_ROUNDS` (3) correct
   answers per game, looping forever until the parent exits (`startRolling`/`rollNext`).
 
-Games only need to honor the opts contract above. (There is no separate 🎲 button
-anymore — ticking every game is the old "surprise" behavior.)
+Each launch resolves a compatible category via `pickCategoryFor` and injects it as
+`opts.category`. (There is no separate 🎲 button anymore — ticking every game is the old
+"surprise" behavior.)
 
 ### Session limit ("Questions" dropdown)
 
@@ -86,30 +131,32 @@ only exit. This is a session-length cap, not scores/progression.
 
 ### Asset fallback rule
 
-Games must work with **zero assets present**. `AnimalRegistry.imageFor()` falls back to a
-big emoji; `SoundKit.playAnimal()` falls back to TTS onomatopoeia. Dropping real files into
+Games must work with **zero assets present**. `AnimalRegistry.artFor()` (and every item
+registry) falls back to a big emoji when the PNG is missing; `SoundKit.playSound(category,
+id)` plays **nothing** when the mp3 is missing (no TTS substitute). Dropping real files into
 `assets/` upgrades the experience with no code change.
 
 ## Game backlog (build in roughly this order)
 
 1. ✅ **Shapes** (`shapes`) — "where is the circle?", 3 procedural SVG shape cards.
    Fully asset-free — this is the flagship game while art is being produced.
-2. ✅ **Animal sounds** (`animal-sounds`) — hear a sound, tap the right animal
-   (works asset-free via emoji + TTS fallbacks; upgrade by dropping files in assets/).
+2. ✅ **Sounds** (`animal-sounds`, titled "Sounds") — hear an animal sound, tap the right
+   card ("Où est la vache ?" + the mp3). Animals only (the sound is the clue); an animal
+   with no mp3 just relies on the spoken prompt. Emoji fallback for missing art.
 3. ✅ **Counting taps** (`counting`) — "tap three apples!", voice counts along each
-   tap, celebrate when all are counted (asset-free via emoji; upgrade by dropping
-   files in assets/images/objects/).
-4. ✅ **Discover the animals** (`free-play`) — a spoken question ("Discover the
-   animals!") over a trio of 3 animals; tapping any plays its sound then speaks
-   its name (no quiz, no fail states). Once all 3 are discovered a fresh trio
-   fades in. Asset-free via emoji + TTS fallbacks. Each completed trio counts as
-   one "answer" so rolling mode and the session limit work unchanged.
+   tap, celebrate when all are counted. Runs on any item category (animals/fruit); uses
+   `R.pluralOf`. Asset-free via emoji; upgrade by dropping files in the category's dir.
+4. ✅ **Discover** (`free-play`) — a category-aware spoken question ("Discover the
+   animals!" / "Découvre les fruits !") over a trio of 3 items; tapping any speaks its
+   name then plays its sound (if the category has one). No quiz, no fail states. Once all
+   3 are discovered a fresh trio fades in. Each completed trio counts as one "answer" so
+   rolling mode and the session limit work unchanged.
 5. ✅ **Color hunt** (`color-hunt`) — "find the red balloon!", 3 differently-
    colored balloons; right = celebrate + speak the color name to reinforce it,
    wrong = gentle wiggle. Fully procedural SVG (6 colors), zero assets.
-6. ✅ **Peekaboo** (`peekaboo`) — one animal hides behind a soft pastel blanket;
-   tapping lifts it, bounces the animal, plays its sound and speaks its name. No
-   wrong answer (each reveal = one "answer"). Asset-free via emoji + TTS fallbacks.
+6. ✅ **Peekaboo** (`peekaboo`) — one item (animal/fruit/…) hides behind a soft pastel
+   blanket; tapping lifts it, bounces it, speaks its name then plays its sound (if any).
+   No wrong answer (each reveal = one "answer"). Asset-free via emoji.
 7. **Pop the bubbles** — floating bubbles with animals/numbers inside.
 8. **Feed the animal** — tap the right food for the hungry animal.
 9. **Shape sorter** — tap-based (not drag), match shape to hole; reuse ShapeRegistry.
@@ -120,7 +167,7 @@ big emoji; `SoundKit.playAnimal()` falls back to TTS onomatopoeia. Dropping real
 Target art style: flat kawaii vector (round heads, closed curved-line smiling
 eyes, cheek blush, soft pastels, no outlines). **Reusable image-generation
 prompt templates live in `docs/asset-prompts.md`** — use them for any new
-animal/object/UI art so the style stays consistent. Asset naming conventions
+animal/fruit/UI art so the style stays consistent. Asset naming conventions
 are in each `assets/*/README.md`; the app auto-detects files, no code changes.
 
 ## Style guide (tokens live in styles.css)

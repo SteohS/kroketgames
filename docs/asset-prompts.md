@@ -21,18 +21,23 @@ generator (Midjourney, DALL·E, Ideogram, Recraft...).
 ### Animal (head/face only — matches the reference)
 > A [ANIMAL] head, front-facing, …base style block…
 
-Examples of `[ANIMAL]`: cow with black-and-white patches and pink muzzle ·
-yellow chick · brown beaver with two front teeth · white hen with red comb ·
-grey goat with small horns · fluffy cream sheep · pink pig · brown foal ·
-white rabbit with long ears and whiskers.
+Examples of `[ANIMAL]` (ids in `js/data/animals.js`): cow with black-and-white
+patches and pink muzzle · yellow duck · brown dog · orange cat · fluffy cream
+sheep · red-combed rooster · brown horse · pink pig · cheeky monkey · smiling
+lion · grey elephant · little blue bird · green frog · grey wolf · peacock with
+a fanned tail · white chicken with red comb.
 
 ### Full-body animal (for future games like feeding / peekaboo)
 > A full-body [ANIMAL], standing, front-facing, short stubby legs,
 > …base style block…
 
-### Object / nature (trees, fruit, everyday items for color hunt & counting)
-> A [OBJECT], e.g. "a round green tree with a brown trunk", "a red apple with
-> one leaf", "a wooden fence post", …base style block…
+### Fruit (for the Fruit category — counting, discover, peekaboo)
+> A [FRUIT], e.g. "a red apple with one leaf", "a yellow banana", "a bunch of
+> purple grapes", "a green kiwi slice", …base style block…
+
+Ids must match `js/data/fruit.js`: apple, banana, orange, strawberry, kiwi,
+lemon, cherry, peach, watermelon, mango, melon, grape, pear, ananas, coconut,
+blueberries. (Future categories follow the same one-file-per-category pattern.)
 
 ### UI element (buttons, icons)
 > A round app button icon showing [SYMBOL] (e.g. "a white speaker symbol on a

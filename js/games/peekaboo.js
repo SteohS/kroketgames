@@ -1,8 +1,9 @@
 /* ==========================================================================
    Game: Peekaboo
-   One animal per round hides behind a soft scalloped "blanket", peeking out
-   at the top. Tapping anywhere lifts the blanket away: the animal bounces,
-   confetti falls, its sound plays and its name is spoken. There is no wrong
+   One item per round (animal, fruit, …) hides behind a soft scalloped
+   "blanket", peeking out at the top. Tapping anywhere lifts the blanket away:
+   it bounces, confetti falls, its name is spoken and then its sound plays (if
+   the category has one — fruit stay silent). There is no wrong
    answer — every tap reveals (like free-play), and each reveal counts as one
    correct answer, so rolling mode and the session limit work via opts
    (see app.js). Fully asset-free (emoji + TTS fallbacks).
@@ -15,6 +16,7 @@
   const kit = GameKit.session();
   let container = null;
   let opts = {};
+  let R = null;               // the content category (registry) for this session
   let current = null;         // the hiding animal
   let coverColor = null;
   let correctCount = 0;
@@ -33,7 +35,7 @@
     if (!kit.alive) return;
     busy = false;
 
-    current = AnimalRegistry.pick(1)[0];
+    current = R.pick(1)[0];
     coverColor = COVERS[Math.floor(Math.random() * COVERS.length)];
 
     container.innerHTML = '';
@@ -45,7 +47,7 @@
 
     const card = document.createElement('button');
     card.className = 'peek-card';
-    card.appendChild(AnimalRegistry.artFor(current));
+    card.appendChild(R.artFor(current));
 
     const cover = document.createElement('div');
     cover.className = 'peek-cover';
@@ -69,9 +71,9 @@
     card.classList.add('bounce');
     App.confetti();
 
-    await SoundKit.playAnimal(current.id);
+    await SoundKit.speak(R.nameOf(current)); // reinforce the name
     if (!kit.alive) return;
-    await SoundKit.speak(AnimalRegistry.nameOf(current)); // reinforce the name
+    await R.playSound(current);              // then its sound (silent for fruit)
     if (!kit.alive) return;
     await SoundKit.speak(I18N.praise());
     if (!kit.alive) return;
@@ -87,6 +89,7 @@
     start(el, o = {}) {
       container = el;
       opts = o;
+      R = o.category || AnimalRegistry; // fallback keeps the game runnable standalone
       correctCount = 0;
       kit.start();
       newRound();

@@ -1,8 +1,8 @@
 /* ==========================================================================
    SoundKit — all audio goes through here.
    - speak(text): speech synthesis in the current language
-   - playAnimal(id): plays assets/audio/animals/<id>.mp3, falls back to
-     spoken onomatopoeia via TTS
+   - playSound(category, id): plays assets/audio/<category>/<id>.mp3; if the
+     file is missing it plays nothing (no TTS substitute)
    - success()/nope(): UI sounds; plays assets/audio/ui/{success,nope}.mp3
      if present, otherwise synthesizes a gentle tone with WebAudio
    Call SoundKit.unlock() from the first user tap (iOS requirement).
@@ -102,11 +102,11 @@ const SoundKit = (() => {
     });
   }
 
-  async function playAnimal(id) {
-    const played = await playFile(`assets/audio/animals/${id}.mp3`);
-    if (!played) {
-      await speak(I18N.t(`animalSoundWords.${id}`), { rate: 1 });
-    }
+  /** Play a category item's sound: assets/audio/<category>/<id>.mp3.
+      If the file is missing there is simply no sound (no TTS substitute). Only
+      sound-bearing categories (animals) reach here — see the registries. */
+  function playSound(category, id) {
+    return playFile(`assets/audio/${category}/${id}.mp3`);
   }
 
   /* ---------- synthesized UI sounds (used when no file present) ---------- */
@@ -148,5 +148,5 @@ const SoundKit = (() => {
     tone(880, 0, 0.09, 'sine', 0.15);
   }
 
-  return { unlock, stop, speak, playAnimal, success, nope, pop };
+  return { unlock, stop, speak, playSound, success, nope, pop };
 })();
