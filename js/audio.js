@@ -67,15 +67,31 @@ const SoundKit = (() => {
 
   function speak(text, { rate = 0.9 } = {}) {
     return new Promise(resolve => {
-      if (!('speechSynthesis' in window)) return resolve();
+      if (!('speechSynthesis' in window) || !text) return resolve();
       speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);
       u.lang = I18N.speechLang();
       const v = pickVoice();
       if (v) u.voice = v;
       u.rate = rate;            // slightly slow, toddler-friendly
-      u.onend = resolve;
-      u.onerror = resolve;
+
+      // The games advance by awaiting this promise (and hold a `busy` flag until
+      // it resolves), so it MUST always settle. iOS Safari intermittently drops
+      // onend/onerror when speak() is called right after cancel() while another
+      // utterance is still in flight — e.g. tapping an answer before the round
+      // prompt finishes speaking. Without a fallback the await would hang and
+      // the game would freeze. A watchdog guarantees forward progress; a
+      // generous length estimate keeps it from clipping normal speech.
+      let settled = false;
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(watchdog);
+        resolve();
+      };
+      u.onend = finish;
+      u.onerror = finish;
+      const watchdog = setTimeout(finish, 2000 + (text.length / rate) * 120);
       speechSynthesis.speak(u);
     });
   }
